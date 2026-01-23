@@ -15,15 +15,39 @@ careers = pd.read_csv("careers.csv")
 def extract_user_skills(user_input):
     """
     Extract skills from user input.
-    Example input: "python, sql, problem solving"
+    Example: "python, sql, problem solving"
     """
     return [skill.strip().lower() for skill in user_input.split(",") if skill.strip()]
 
 
-def recommend_careers_with_skill_gap(user_input):
+def generate_learning_roadmap(missing_skills):
     """
-    Recommend careers using a scoring algorithm
-    and calculate skill gaps.
+    Generate a simple week-by-week learning roadmap
+    based on missing skills.
+    """
+    roadmap = []
+    week = 1
+
+    for skill in missing_skills:
+        roadmap.append(f"Week {week}: Learn basics of {skill.capitalize()}")
+        week += 1
+        roadmap.append(
+            f"Week {week}: Practice {skill.capitalize()} with small projects"
+        )
+        week += 1
+
+    if not roadmap:
+        roadmap.append(
+            "You already have all the required skills. Focus on advanced projects."
+        )
+
+    return roadmap
+
+
+def recommend_careers_with_roadmap(user_input):
+    """
+    Recommend careers using a scoring algorithm,
+    calculate skill gaps, and generate learning roadmaps.
     """
     user_skills = set(extract_user_skills(user_input))
     recommendations = []
@@ -36,6 +60,8 @@ def recommend_careers_with_skill_gap(user_input):
         score = len(matched_skills)
 
         if score > 0:
+            roadmap = generate_learning_roadmap(missing_skills)
+
             recommendations.append(
                 {
                     "Career": row["Career"],
@@ -43,10 +69,11 @@ def recommend_careers_with_skill_gap(user_input):
                     "Score": score,
                     "MatchedSkills": list(matched_skills),
                     "MissingSkills": list(missing_skills),
+                    "Roadmap": roadmap,
                 }
             )
 
-    # Sort careers by highest match score
+    # Sort by highest score
     recommendations.sort(key=lambda x: x["Score"], reverse=True)
 
     if not recommendations:
@@ -57,10 +84,11 @@ def recommend_careers_with_skill_gap(user_input):
                 "Score": 0,
                 "MatchedSkills": [],
                 "MissingSkills": [],
+                "Roadmap": [],
             }
         ]
 
-    return recommendations[:3]  # Top 3 careers
+    return recommendations[:3]
 
 
 # -----------------------------
@@ -76,9 +104,11 @@ def index():
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "")
-    recommendations = recommend_careers_with_skill_gap(user_message)
+    recommendations = recommend_careers_with_roadmap(user_message)
 
-    reply = "Here are the best career matches based on your skills:\n\n"
+    reply = (
+        "Here are the best career matches and learning plans based on your skills:\n\n"
+    )
 
     for rec in recommendations:
         reply += (
@@ -89,6 +119,11 @@ def chat():
 
         if rec["MissingSkills"]:
             reply += f"📌 Skills to Learn: {', '.join(rec['MissingSkills'])}\n"
+
+        if rec["Roadmap"]:
+            reply += "🗺️ Learning Roadmap:\n"
+            for step in rec["Roadmap"]:
+                reply += f"   - {step}\n"
 
         reply += "\n"
 
