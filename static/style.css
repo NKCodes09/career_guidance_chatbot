@@ -1,37 +1,75 @@
 body {
   font-family: Arial, sans-serif;
+  margin: 0;
   background: #f0f4f8;
+  color: #333;
+}
+
+/* HERO */
+.hero {
+  text-align: center;
+  padding: 90px 20px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 15px;
+}
+
+.hero p {
+  max-width: 600px;
+  margin: auto;
+  font-size: 18px;
+}
+
+/* BUTTON */
+.btn {
+  margin-top: 25px;
+  padding: 12px 24px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.btn.primary {
+  background: white;
+  color: #007bff;
+  font-weight: bold;
+}
+
+/* CHAT */
+.chat-section {
   display: flex;
   justify-content: center;
-  padding-top: 50px;
+  margin-top: 40px;
 }
 
 .chatbox {
   background: white;
-  border-radius: 12px;
   padding: 20px;
-  width: 400px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  width: 420px;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
 #chatlog {
-  height: 300px;
+  height: 280px;
   overflow-y: auto;
-  margin-bottom: 10px;
   border: 1px solid #ddd;
   padding: 10px;
+  margin-bottom: 10px;
 }
 
-input {
-  width: 75%;
+input[type="text"],
+input[type="file"] {
+  width: 100%;
+  margin-bottom: 10px;
   padding: 8px;
 }
 
-button {
-  padding: 8px 12px;
-  background-color: #007bff;
-  border: none;
-  color: white;
-  border-radius: 5px;
-  cursor: pointer;
+.hidden {
+  display: none;
 }
