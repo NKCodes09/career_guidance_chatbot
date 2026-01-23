@@ -17,21 +17,22 @@ def extract_user_skills(user_input):
     Extract skills from user input.
     Example input: "python, sql, problem solving"
     """
-    return [skill.strip().lower() for skill in user_input.split(",")]
+    return [skill.strip().lower() for skill in user_input.split(",") if skill.strip()]
 
 
-def recommend_careers(user_input):
+def recommend_careers_with_skill_gap(user_input):
     """
-    Recommend careers based on a scoring algorithm.
-    Score = number of matched skills
+    Recommend careers using a scoring algorithm
+    and calculate skill gaps.
     """
-    user_skills = extract_user_skills(user_input)
+    user_skills = set(extract_user_skills(user_input))
     recommendations = []
 
     for _, row in careers.iterrows():
-        career_skills = [s.strip().lower() for s in row["Skills"].split(",")]
+        career_skills = set(skill.strip().lower() for skill in row["Skills"].split(","))
 
-        matched_skills = set(user_skills) & set(career_skills)
+        matched_skills = user_skills & career_skills
+        missing_skills = career_skills - user_skills
         score = len(matched_skills)
 
         if score > 0:
@@ -41,10 +42,11 @@ def recommend_careers(user_input):
                     "Description": row["Description"],
                     "Score": score,
                     "MatchedSkills": list(matched_skills),
+                    "MissingSkills": list(missing_skills),
                 }
             )
 
-    # Sort careers by score (highest first)
+    # Sort careers by highest match score
     recommendations.sort(key=lambda x: x["Score"], reverse=True)
 
     if not recommendations:
@@ -54,6 +56,7 @@ def recommend_careers(user_input):
                 "Description": "Try adding more skills or interests.",
                 "Score": 0,
                 "MatchedSkills": [],
+                "MissingSkills": [],
             }
         ]
 
@@ -73,7 +76,7 @@ def index():
 @app.route("/chat", methods=["POST"])
 def chat():
     user_message = request.json.get("message", "")
-    recommendations = recommend_careers(user_message)
+    recommendations = recommend_careers_with_skill_gap(user_message)
 
     reply = "Here are the best career matches based on your skills:\n\n"
 
@@ -81,8 +84,13 @@ def chat():
         reply += (
             f"🎯 {rec['Career']} (Match Score: {rec['Score']})\n"
             f"🧠 Matched Skills: {', '.join(rec['MatchedSkills']) if rec['MatchedSkills'] else 'None'}\n"
-            f"📄 {rec['Description']}\n\n"
+            f"📄 {rec['Description']}\n"
         )
+
+        if rec["MissingSkills"]:
+            reply += f"📌 Skills to Learn: {', '.join(rec['MissingSkills'])}\n"
+
+        reply += "\n"
 
     return jsonify({"reply": reply})
 
