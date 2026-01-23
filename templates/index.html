@@ -2,35 +2,59 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>AI Career Guidance Chatbot</title>
+  <title>AI Career Guidance Platform</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
+
+<section class="hero">
+  <h1>AI-Powered Career Guidance</h1>
+  <p>Upload your CV and start chatting to get personalised career advice.</p>
+  <button class="btn primary" onclick="startChat()">Start Chatting</button>
+</section>
+
+<section id="chatSection" class="chat-section hidden">
   <div class="chatbox">
-    <h2>AI Career Guidance Chatbot</h2>
+    <h2>Career Guidance Chat</h2>
+
     <div id="chatlog"></div>
-    <input id="userInput" type="text" placeholder="Type your skills or interests..." />
-    <button onclick="sendMessage()">Send</button>
+
+    <input id="userInput" type="text" placeholder="Type your skills (e.g. python sql)" />
+    <input id="cvFile" type="file" accept=".pdf,.docx" />
+
+    <button class="btn primary" onclick="sendMessage()">Send</button>
   </div>
+</section>
 
-  <script>
-    async function sendMessage() {
-      const input = document.getElementById("userInput");
-      const message = input.value;
-      input.value = "";
+<script>
+  function startChat() {
+    document.querySelector(".hero").style.display = "none";
+    document.getElementById("chatSection").classList.remove("hidden");
+  }
 
-      const chatlog = document.getElementById("chatlog");
-      chatlog.innerHTML += `<p><b>You:</b> ${message}</p>`;
+  async function sendMessage() {
+    const message = document.getElementById("userInput").value;
+    const fileInput = document.getElementById("cvFile");
+    const chatlog = document.getElementById("chatlog");
 
-      const res = await fetch("/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message }),
-      });
+    const formData = new FormData();
+    formData.append("message", message);
 
-      const data = await res.json();
-      chatlog.innerHTML += `<p><b>Bot:</b> ${data.reply.replace(/\n/g, "<br>")}</p>`;
+    if (fileInput.files.length > 0) {
+      formData.append("cv", fileInput.files[0]);
     }
-  </script>
+
+    chatlog.innerHTML += `<p><b>You:</b> ${message}</p>`;
+
+    const res = await fetch("/chat", {
+      method: "POST",
+      body: formData
+    });
+
+    const data = await res.json();
+    chatlog.innerHTML += `<p><b>Bot:</b><br>${data.reply.replace(/\n/g, "<br>")}</p>`;
+  }
+</script>
+
 </body>
 </html>

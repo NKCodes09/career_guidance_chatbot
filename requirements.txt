@@ -1,3 +1,10 @@
 Flask
 pandas
 gunicorn
+PyPDF2
+python-docx
+google-generativeai
+google-genai
+python-dotenv
+
+
