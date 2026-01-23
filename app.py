@@ -1,30 +1,71 @@
 from flask import Flask, render_template, request, jsonify
 import pandas as pd
+import re
 
 app = Flask(__name__)
 
 # Load career dataset
 careers = pd.read_csv("careers.csv")
 
+# Career knowledge base
+CAREER_INFO = {
+    "Data Analyst": {
+        "Responsibilities": [
+            "Collect and clean data",
+            "Analyse data to identify trends",
+            "Create reports and dashboards",
+            "Support business decision-making",
+        ],
+        "Progression": [
+            "Junior Data Analyst",
+            "Data Analyst",
+            "Senior Data Analyst",
+            "Data Scientist / Analytics Manager",
+        ],
+    },
+    "Software Developer": {
+        "Responsibilities": [
+            "Design and develop software applications",
+            "Write and maintain code",
+            "Debug and fix issues",
+            "Collaborate using version control",
+        ],
+        "Progression": [
+            "Junior Developer",
+            "Software Developer",
+            "Senior Developer",
+            "Lead Engineer / Architect",
+        ],
+    },
+    "Cyber Security Analyst": {
+        "Responsibilities": [
+            "Monitor systems for security threats",
+            "Conduct vulnerability assessments",
+            "Respond to security incidents",
+            "Implement security controls",
+        ],
+        "Progression": [
+            "Security Analyst",
+            "Senior Security Analyst",
+            "Security Engineer",
+            "Security Architect / CISO",
+        ],
+    },
+}
 
 # -----------------------------
 # Helper Functions
 # -----------------------------
 
 
-def extract_user_skills(user_input):
+def tokenize_text(text):
     """
-    Extract skills from user input.
-    Example: "python, sql, problem solving"
+    Convert free text into a set of lowercase words.
     """
-    return [skill.strip().lower() for skill in user_input.split(",") if skill.strip()]
+    return set(re.findall(r"\b[a-zA-Z]+\b", text.lower()))
 
 
 def generate_learning_roadmap(missing_skills):
-    """
-    Generate a simple week-by-week learning roadmap
-    based on missing skills.
-    """
     roadmap = []
     week = 1
 
@@ -38,42 +79,89 @@ def generate_learning_roadmap(missing_skills):
 
     if not roadmap:
         roadmap.append(
-            "You already have all the required skills. Focus on advanced projects."
+            "You already have all required skills. Focus on advanced projects."
         )
 
     return roadmap
 
 
-def recommend_careers_with_roadmap(user_input):
-    """
-    Recommend careers using a scoring algorithm,
-    calculate skill gaps, and generate learning roadmaps.
-    """
-    user_skills = set(extract_user_skills(user_input))
+def analyse_cv_text(cv_text, target_career_skills):
+    feedback = []
+    cv_words = tokenize_text(cv_text)
+
+    # Required CV sections
+    sections = ["education", "experience", "skills", "projects"]
+    missing_sections = [s for s in sections if s not in cv_words]
+
+    if missing_sections:
+        feedback.append(
+            f"Your CV is missing important sections: {', '.join(missing_sections)}."
+        )
+
+    # Skill alignment
+    missing_skills = target_career_skills - cv_words
+    if missing_skills:
+        feedback.append(
+            f"Consider adding or highlighting these skills: {', '.join(missing_skills)}."
+        )
+
+    # Action verbs
+    action_verbs = {
+        "developed",
+        "designed",
+        "implemented",
+        "analysed",
+        "built",
+        "created",
+    }
+    used_verbs = action_verbs & cv_words
+
+    if len(used_verbs) < 2:
+        feedback.append(
+            "Use stronger action verbs such as developed, implemented, analysed, or designed."
+        )
+
+    if not feedback:
+        feedback.append(
+            "Your CV is well-structured and aligned with the selected career."
+        )
+
+    return feedback
+
+
+def recommend_careers(user_input, cv_text=None):
+    user_words = tokenize_text(user_input)
     recommendations = []
 
     for _, row in careers.iterrows():
         career_skills = set(skill.strip().lower() for skill in row["Skills"].split(","))
 
-        matched_skills = user_skills & career_skills
-        missing_skills = career_skills - user_skills
+        matched_skills = career_skills & user_words
+        missing_skills = career_skills - user_words
         score = len(matched_skills)
 
         if score > 0:
-            roadmap = generate_learning_roadmap(missing_skills)
+            career_name = row["Career"]
+            info = CAREER_INFO.get(career_name, {})
+
+            cv_feedback = []
+            if cv_text:
+                cv_feedback = analyse_cv_text(cv_text, career_skills)
 
             recommendations.append(
                 {
-                    "Career": row["Career"],
+                    "Career": career_name,
                     "Description": row["Description"],
                     "Score": score,
                     "MatchedSkills": list(matched_skills),
                     "MissingSkills": list(missing_skills),
-                    "Roadmap": roadmap,
+                    "Roadmap": generate_learning_roadmap(missing_skills),
+                    "Responsibilities": info.get("Responsibilities", []),
+                    "Progression": info.get("Progression", []),
+                    "CVFeedback": cv_feedback,
                 }
             )
 
-    # Sort by highest score
     recommendations.sort(key=lambda x: x["Score"], reverse=True)
 
     if not recommendations:
@@ -85,6 +173,9 @@ def recommend_careers_with_roadmap(user_input):
                 "MatchedSkills": [],
                 "MissingSkills": [],
                 "Roadmap": [],
+                "Responsibilities": [],
+                "Progression": [],
+                "CVFeedback": [],
             }
         ]
 
@@ -103,27 +194,28 @@ def index():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_message = request.json.get("message", "")
-    recommendations = recommend_careers_with_roadmap(user_message)
+    data = request.json
+    user_message = data.get("message", "")
+    cv_text = data.get("cv", "")
 
-    reply = (
-        "Here are the best career matches and learning plans based on your skills:\n\n"
-    )
+    recommendations = recommend_careers(user_message, cv_text)
+
+    reply = "Here is your personalised career guidance and CV feedback:\n\n"
 
     for rec in recommendations:
         reply += (
             f"🎯 {rec['Career']} (Match Score: {rec['Score']})\n"
-            f"🧠 Matched Skills: {', '.join(rec['MatchedSkills']) if rec['MatchedSkills'] else 'None'}\n"
             f"📄 {rec['Description']}\n"
+            f"🧠 Matched Skills: {', '.join(rec['MatchedSkills']) if rec['MatchedSkills'] else 'None'}\n"
         )
 
         if rec["MissingSkills"]:
             reply += f"📌 Skills to Learn: {', '.join(rec['MissingSkills'])}\n"
 
-        if rec["Roadmap"]:
-            reply += "🗺️ Learning Roadmap:\n"
-            for step in rec["Roadmap"]:
-                reply += f"   - {step}\n"
+        if rec["CVFeedback"]:
+            reply += "📄 CV Feedback:\n"
+            for f in rec["CVFeedback"]:
+                reply += f"   - {f}\n"
 
         reply += "\n"
 
