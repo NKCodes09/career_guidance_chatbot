@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="chat-card">
+    <h2>Career Chatbot</h2>
+
+    <div id="chat-box" class="chat-box" aria-live="polite"></div>
+
+    <form id="chat-form" class="chat-form">
+        <input id="message" type="text" placeholder="Ask about your career…" required>
+        <button class="btn primary">Send</button>
+    </form>
+</div>
+
+<script>
+const form = document.getElementById("chat-form");
+const box = document.getElementById("chat-box");
+const input = document.getElementById("message");
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    box.innerHTML += `<div class="msg user">${text}</div>`;
+    input.value = "";
+    box.scrollTop = box.scrollHeight;
+
+    const res = await fetch("/chat/send", {
+        method: "POST",
+        body: new URLSearchParams({ message: text })
+    });
+
+    const data = await res.json();
+    box.innerHTML += `<div class="msg bot">${data.reply}</div>`;
+    box.scrollTop = box.scrollHeight;
+});
+</script>
+
+{% endblock %}

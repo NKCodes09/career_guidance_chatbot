@@ -1,75 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>AI Career Guidance Platform</title>
-  <link rel="stylesheet" href="/static/style.css" />
-</head>
-<body>
+{% extends "base.html" %}
 
-<div class="landing-container">
-
-  <!-- HERO -->
-  <section class="hero">
+{% block content %}
+<section class="hero">
     <h1>AI-Powered Career Guidance</h1>
-    <p>
-      Discover the right career, identify skill gaps, upload your CV,
-      and prepare for interviews using AI-assisted guidance.
-    </p>
-
-    <button class="btn primary" onclick="startChat()">Start Chatting</button>
-  </section>
-
-  <!-- CHAT SECTION (HIDDEN INITIALLY) -->
-  <section id="chatSection" class="chat-section hidden">
-    <div class="chatbox">
-      <h2>Career Guidance Chat</h2>
-
-      <div id="chatlog"></div>
-
-      <input
-        id="userInput"
-        type="text"
-        placeholder="Type your skills or interests (e.g. python sql)"
-      />
-
-      <input
-        id="cvFile"
-        type="file"
-        accept=".pdf,.doc,.docx"
-      />
-
-      <button class="btn primary" onclick="sendMessage()">Send</button>
-    </div>
-  </section>
-
-</div>
-
-<script>
-  function startChat() {
-    document.querySelector(".hero").style.display = "none";
-    document.getElementById("chatSection").classList.remove("hidden");
-  }
-
-  async function sendMessage() {
-    const messageInput = document.getElementById("userInput");
-    const message = messageInput.value;
-    messageInput.value = "";
-
-    const chatlog = document.getElementById("chatlog");
-    chatlog.innerHTML += `<p><b>You:</b> ${message}</p>`;
-
-    // NOTE: File upload handling will be added later
-    const response = await fetch("/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message })
-    });
-
-    const data = await response.json();
-    chatlog.innerHTML += `<p><b>Bot:</b><br>${data.reply.replace(/\n/g, "<br>")}</p>`;
-  }
-</script>
-
-</body>
-</html>
+    <p>Discover the best tech career path based on your skills and interests.</p>
+    <a href="/signup" class="btn primary">Get Started</a>
+</section>
+{% endblock %}
