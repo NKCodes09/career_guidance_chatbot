@@ -1,14 +1,16 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="chat-card">
-    <h2>Career Chatbot</h2>
+<div class="chat-wrapper">
+    <div class="chat-header">
+        <h2>AI Career Assistant</h2>
+    </div>
 
-    <div id="chat-box" class="chat-box" aria-live="polite"></div>
+    <div id="chat-box" class="chat-box"></div>
 
     <form id="chat-form" class="chat-form">
-        <input id="message" type="text" placeholder="Ask about your career…" required>
-        <button class="btn primary">Send</button>
+        <input id="message" type="text" placeholder="Type your message…" required>
+        <button>Send</button>
     </form>
 </div>
 
@@ -17,14 +19,32 @@ const form = document.getElementById("chat-form");
 const box = document.getElementById("chat-box");
 const input = document.getElementById("message");
 
-form.addEventListener("submit", async (e) => {
+function add(role, text) {
+    const div = document.createElement("div");
+    div.className = `message ${role}`;
+    div.innerHTML = `<strong>${role === "user" ? "You" : "AI"}</strong>
+                     <div class="bubble">${text.replace(/\n/g,"<br>")}</div>`;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+}
+
+function typing() {
+    const t = document.createElement("div");
+    t.id = "typing";
+    t.className = "message bot typing";
+    t.innerHTML = `<strong>AI</strong><div class="bubble">Typing…</div>`;
+    box.appendChild(t);
+    box.scrollTop = box.scrollHeight;
+}
+
+form.addEventListener("submit", async e => {
     e.preventDefault();
     const text = input.value.trim();
     if (!text) return;
 
-    box.innerHTML += `<div class="msg user">${text}</div>`;
+    add("user", text);
     input.value = "";
-    box.scrollTop = box.scrollHeight;
+    typing();
 
     const res = await fetch("/chat/send", {
         method: "POST",
@@ -32,8 +52,8 @@ form.addEventListener("submit", async (e) => {
     });
 
     const data = await res.json();
-    box.innerHTML += `<div class="msg bot">${data.reply}</div>`;
-    box.scrollTop = box.scrollHeight;
+    document.getElementById("typing").remove();
+    add("bot", data.reply);
 });
 </script>
 

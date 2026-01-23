@@ -1,14 +1,20 @@
+/* =====================
+   GLOBAL RESET & BASE
+===================== */
 * {
     box-sizing: border-box;
 }
 
 body {
     margin: 0;
-    font-family: system-ui, Arial, sans-serif;
-    background: #f4f6f8;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    background: #f0f2f5;
+    color: #1c1e21;
 }
 
-/* Navbar */
+/* =====================
+   NAVBAR
+===================== */
 .navbar {
     background: #1877f2;
     color: white;
@@ -22,48 +28,86 @@ body {
     color: white;
     margin-left: 16px;
     text-decoration: none;
+    font-weight: 500;
 }
 
 .logo {
-    font-weight: bold;
     font-size: 20px;
+    font-weight: bold;
 }
 
-/* Layout */
+/* =====================
+   LAYOUT
+===================== */
 .container {
-    max-width: 900px;
+    max-width: 1000px;
     margin: auto;
     padding: 40px 20px;
 }
 
-/* Hero */
+/* =====================
+   LANDING PAGE
+===================== */
 .hero {
     text-align: center;
+    margin-top: 60px;
 }
 
 .hero h1 {
-    font-size: 42px;
+    font-size: 44px;
     color: #1877f2;
+    margin-bottom: 10px;
 }
 
-/* Cards */
-.card, .chat-card {
-    max-width: 400px;
-    margin: auto;
+.hero p {
+    font-size: 20px;
+    color: #444;
+}
+
+.hero .btn {
+    margin-top: 20px;
+}
+
+/* =====================
+   AUTH CARDS (LOGIN / SIGNUP)
+===================== */
+.card {
+    max-width: 380px;
+    margin: 60px auto;
     background: white;
-    padding: 24px;
+    padding: 26px;
     border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.12);
 }
 
-/* Buttons */
+.card h2 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* =====================
+   FORMS & BUTTONS
+===================== */
+input {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+input:focus {
+    outline: 3px solid #aac7ff;
+}
+
 .btn {
-    display: inline-block;
     width: 100%;
     padding: 12px;
     border-radius: 6px;
     border: none;
     cursor: pointer;
+    font-size: 16px;
 }
 
 .btn.primary {
@@ -71,43 +115,134 @@ body {
     color: white;
 }
 
-/* Inputs */
-input {
-    width: 100%;
+/* =====================
+   FLASH ALERTS
+===================== */
+.alerts {
+    max-width: 400px;
+    margin: 0 auto 20px;
+}
+
+.alert {
     padding: 12px;
-    margin-bottom: 12px;
     border-radius: 6px;
-    border: 1px solid #ccc;
-}
-
-/* Chat */
-.chat-box {
-    height: 300px;
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 10px;
     margin-bottom: 10px;
+    text-align: center;
 }
 
-.msg {
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    border-radius: 6px;
+.alert.error {
+    background: #fdecea;
+    color: #b71c1c;
 }
 
-.msg.user {
-    background: #1877f2;
-    color: white;
+.alert.success {
+    background: #e6f4ea;
+    color: #1e7e34;
+}
+
+/* =====================
+   CHAT PAGE (SCOPED)
+===================== */
+.chat-wrapper {
+    max-width: 850px;
+    margin: auto;
+    background: white;
+    border-radius: 10px;
+    height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.chat-header {
+    padding: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.chat-header h2 {
+    margin: 0;
+    color: #1877f2;
+}
+
+.chat-box {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    background: #fafafa;
+}
+
+.message {
+    margin-bottom: 16px;
+    max-width: 90%;
+}
+
+.message strong {
+    font-size: 13px;
+    color: #555;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.message.user {
+    margin-left: auto;
     text-align: right;
 }
 
-.msg.bot {
-    background: #e4e6eb;
+.message.user .bubble {
+    background: #1877f2;
+    color: white;
 }
 
-/* Responsive */
+.message.bot .bubble {
+    background: #e4e6eb;
+    color: #1c1e21;
+}
+
+.bubble {
+    padding: 12px 14px;
+    border-radius: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+.typing .bubble {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+/* =====================
+   CHAT INPUT
+===================== */
+.chat-form {
+    display: flex;
+    gap: 10px;
+    padding: 12px;
+    border-top: 1px solid #eee;
+}
+
+.chat-form input {
+    flex: 1;
+}
+
+.chat-form button {
+    padding: 12px 18px;
+    border-radius: 8px;
+    border: none;
+    background: #1877f2;
+    color: white;
+    font-size: 16px;
+}
+
+/* =====================
+   RESPONSIVE
+===================== */
 @media (max-width: 600px) {
     .hero h1 {
         font-size: 32px;
+    }
+
+    .chat-wrapper {
+        height: 90vh;
+        border-radius: 0;
     }
 }
