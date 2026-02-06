@@ -1,18 +1,34 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="chat-wrapper">
-    <div class="chat-header">
-        <h2>AI Career Assistant</h2>
+<section class="page">
+  <div class="page-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="chat-shell">
+    <div class="chat-card">
+      <div class="chat-top">
+        <div class="chat-title">
+          <h2>AI Career Assistant</h2>
+          <p>Ask anything — tech, business, healthcare, creative, trades, or research.</p>
+        </div>
+        <a href="/logout" class="btn ghost">Logout</a>
+      </div>
+
+      <div id="chat-box" class="chat-box"></div>
+
+      <form id="chat-form" class="chat-form">
+        <input id="message" type="text"
+               placeholder="Tell me your interests, education/skills, and goals (any career)…"
+               required>
+        <button class="btn primary" type="submit">Send</button>
+      </form>
     </div>
-
-    <div id="chat-box" class="chat-box"></div>
-
-    <form id="chat-form" class="chat-form">
-        <input id="message" type="text" placeholder="Type your message…" required>
-        <button>Send</button>
-    </form>
-</div>
+  </div>
+</section>
 
 <script>
 const form = document.getElementById("chat-form");
@@ -20,40 +36,45 @@ const box = document.getElementById("chat-box");
 const input = document.getElementById("message");
 
 function add(role, text) {
-    const div = document.createElement("div");
-    div.className = `message ${role}`;
-    div.innerHTML = `<strong>${role === "user" ? "You" : "AI"}</strong>
-                     <div class="bubble">${text.replace(/\n/g,"<br>")}</div>`;
-    box.appendChild(div);
-    box.scrollTop = box.scrollHeight;
+  const div = document.createElement("div");
+  div.className = `message ${role}`;
+
+  const label = role === "user" ? "You" : "AI";
+  const safeText = (text || "").replace(/\n/g, "<br>");
+
+  div.innerHTML = `<strong>${label}</strong><div class="bubble">${safeText}</div>`;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
 }
 
 function typing() {
-    const t = document.createElement("div");
-    t.id = "typing";
-    t.className = "message bot typing";
-    t.innerHTML = `<strong>AI</strong><div class="bubble">Typing…</div>`;
-    box.appendChild(t);
-    box.scrollTop = box.scrollHeight;
+  const t = document.createElement("div");
+  t.id = "typing";
+  t.className = "message bot typing";
+  t.innerHTML = `<strong>AI</strong><div class="bubble">Typing…</div>`;
+  box.appendChild(t);
+  box.scrollTop = box.scrollHeight;
 }
 
-form.addEventListener("submit", async e => {
-    e.preventDefault();
-    const text = input.value.trim();
-    if (!text) return;
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
 
-    add("user", text);
-    input.value = "";
-    typing();
+  add("user", text);
+  input.value = "";
+  typing();
 
-    const res = await fetch("/chat/send", {
-        method: "POST",
-        body: new URLSearchParams({ message: text })
-    });
+  const res = await fetch("/chat/send", {
+    method: "POST",
+    body: new URLSearchParams({ message: text })
+  });
 
-    const data = await res.json();
-    document.getElementById("typing").remove();
-    add("bot", data.reply);
+  const data = await res.json();
+  const typingEl = document.getElementById("typing");
+  if (typingEl) typingEl.remove();
+
+  add("bot", data.reply);
 });
 </script>
 

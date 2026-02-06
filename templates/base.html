@@ -1,43 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>AI Career Chatbot</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8">
+  <title>AI Career Chatbot</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- ✅ Correct Flask CSS loading -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
 
-<header class="navbar">
-    <div class="logo">AI Career</div>
-    <nav>
+  <!-- =========================
+       Premium Navbar
+  ========================== -->
+  <header class="navbar">
+    <div class="nav-inner">
+      <div class="logo">
+        <span class="logo-accent">AI</span> Career
+      </div>
+
+      <nav class="nav-links">
         {% if session.get("user_id") %}
-            <a href="/chat">Chat</a>
-            <a href="/logout">Logout</a>
+          <a href="/chat">Chat</a>
+          <a href="/logout" class="btn ghost small">Logout</a>
         {% else %}
-            <a href="/login">Login</a>
-            <a href="/signup">Sign Up</a>
+          <a href="/login">Login</a>
+          <a href="/signup" class="btn ghost small">Sign Up</a>
         {% endif %}
-    </nav>
-</header>
-
-<main class="container">
-    {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    <div class="alerts">
-      {% for category, message in messages %}
-        <div class="alert {{ category }}">
-          {{ message }}
-        </div>
-      {% endfor %}
+      </nav>
     </div>
-  {% endif %}
-{% endwith %}
+  </header>
 
+  <!-- =========================
+       Flash Messages
+  ========================== -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="flash-wrapper">
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <!-- =========================
+       Page Content
+  ========================== -->
+  <main>
     {% block content %}{% endblock %}
-</main>
+  </main>
 
 </body>
 </html>

@@ -1,11 +1,32 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="card">
-    <h2>Log In</h2>
-    <form method="POST">
-        <input type="email" name="email" placeholder="Email" required>
-        <input type="password" name="password" placeholder="Password" required>
-        <button class="btn primary">Log In</button>
-    </form>
-</div>
+
+<section class="page">
+    <div class="page-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <div class="shell">
+        <div class="card">
+            <div class="card-pad">
+                <h2 class="card-title">Log In</h2>
+                <p class="card-subtitle">Welcome back. Continue your career journey.</p>
+
+                <form method="POST" class="form">
+                    <input class="input" type="email" name="email" placeholder="Email" required>
+                    <input class="input" type="password" name="password" placeholder="Password" required>
+                    <button class="btn primary block" type="submit">Log In</button>
+                </form>
+
+                <div class="helper-row">
+                    <a class="small-link" href="/signup">Don’t have an account? Sign up</a>
+                    <a class="small-link" href="/">Back to home</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 {% endblock %}

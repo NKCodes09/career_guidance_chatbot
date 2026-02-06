@@ -1,8 +1,87 @@
 {% extends "base.html" %}
 {% block content %}
-<section class="hero">
-    <h1>AI-Powered Career Guidance</h1>
-    <p>Discover tech careers that match your skills and goals.</p>
-    <a href="/signup" class="btn primary">Get Started</a>
+
+<section class="landing">
+    <div class="landing-bg">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <div class="landing-inner">
+        <div class="hero-left">
+            <span class="pill">AI Career Assistant • Any Career Path</span>
+
+            <h1 class="hero-title">
+                AI-Powered Career Guidance
+                <span class="hero-highlight">built for your goals</span>
+            </h1>
+
+            <p class="hero-subtitle">
+                Discover careers that match your interests, skills, and personality — then get a step-by-step plan to
+                get there.
+            </p>
+
+            <div class="hero-cta">
+                <a href="/signup" class="btn primary">Get Started</a>
+                <a href="/login" class="btn ghost">I already have an account</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-num">3–6</div>
+                    <div class="stat-label">career paths</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">30/60/90</div>
+                    <div class="stat-label">day plan</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-num">Fast</div>
+                    <div class="stat-label">clear answers</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="preview-card">
+                <div class="preview-top">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                    <span class="preview-title">Career Chat</span>
+                </div>
+
+                <div class="preview-body">
+                    <div class="msg user">
+                        <div class="bubble">I enjoy helping people and I’m interested in health & science. What careers
+                            fit me?</div>
+                    </div>
+
+                    <div class="msg bot">
+                        <div class="bubble">
+                            Here are 4 strong options: <br><br>
+                            <b>1) Physiotherapy</b> — hands-on patient care + science <br>
+                            <b>2) Public Health</b> — community impact + research <br>
+                            <b>3) Occupational Therapy</b> — rehab + human-centered work <br>
+                            <b>4) Clinical Research</b> — structured science roles <br><br>
+                            Want to share your education level + preferred work style?
+                        </div>
+                    </div>
+
+                    <div class="mini-cards">
+                        <div class="mini">Personalized</div>
+                        <div class="mini">Action Plan</div>
+                        <div class="mini">Any Career</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="floating-badge badge-1">✨ Skill Roadmap</div>
+            <div class="floating-badge badge-2">🎯 Clear Direction</div>
+            <div class="floating-badge badge-3">📌 Next Steps</div>
+        </div>
+    </div>
 </section>
+
 {% endblock %}
