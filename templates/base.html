@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>AI Career Chatbot</title>
@@ -12,6 +13,15 @@
 
   <!-- Main CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Favicons -->
+  <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
+
+  <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
+
 </head>
 
 <body>
@@ -27,11 +37,11 @@
 
       <nav class="nav-links">
         {% if session.get("user_id") %}
-          <a href="/chat">Chat</a>
-          <a href="/logout" class="btn ghost small">Logout</a>
+        <a href="/chat">Chat</a>
+        <a href="/logout" class="btn ghost small">Logout</a>
         {% else %}
-          <a href="/login">Login</a>
-          <a href="/signup" class="btn ghost small">Sign Up</a>
+        <a href="/login">Login</a>
+        <a href="/signup" class="btn ghost small">Sign Up</a>
         {% endif %}
       </nav>
     </div>
@@ -41,15 +51,15 @@
        Flash Messages
   ========================== -->
   {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      <div class="flash-wrapper">
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">
-            {{ message }}
-          </div>
-        {% endfor %}
-      </div>
-    {% endif %}
+  {% if messages %}
+  <div class="flash-wrapper">
+    {% for category, message in messages %}
+    <div class="flash {{ category }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
   {% endwith %}
 
   <!-- =========================
@@ -60,4 +70,6 @@
   </main>
 
 </body>
+
 </html>
+

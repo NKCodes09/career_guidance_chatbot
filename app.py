@@ -20,7 +20,7 @@ if not API_KEY:
     raise RuntimeError("GOOGLE_API_KEY not set")
 
 client = genai.Client(api_key=API_KEY)
-MODEL_NAME = "models/gemini-flash-latest"
+MODEL_NAME = "models/gemini-2.5-flash"
 
 app = Flask(__name__)
 app.secret_key = "replace_this_with_random_secret"
@@ -207,3 +207,4 @@ def chat_send():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
