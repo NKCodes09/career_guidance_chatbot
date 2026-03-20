@@ -64,8 +64,10 @@
           <h3 id="results-title"></h3>
           <p id="results-msg" class="results-msg"></p>
           <div id="results-breakdown" class="results-breakdown"></div>
-          <button class="btn primary" onclick="restartQuiz()" style="margin-top:20px;">Try Again</button>
-          <a href="/dashboard" class="btn ghost" style="margin-top:10px;display:block;text-align:center;">Back to Dashboard</a>
+          <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;justify-content:center;">
+            <button class="btn primary" onclick="restartQuiz()">Try Again</button>
+            <a href="/dashboard" class="btn ghost">Back to Dashboard</a>
+          </div>
         </div>
       </div>
 
@@ -73,11 +75,8 @@
   </div>
 </section>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script>
-marked.setOptions({ breaks: true, gfm: true });
-
-let questions = [], current = 0, score = 0, userAnswers = [];
+let questions = [], current = 0, score = 0, userAnswers = [], quizTopic = '';
 
 function show(id) {
   ['screen-setup','screen-loading','screen-quiz','screen-results'].forEach(s => {
@@ -86,11 +85,11 @@ function show(id) {
 }
 
 async function startQuiz() {
-  const topic = document.getElementById('quiz-topic').value.trim();
-  if (!topic) { alert('Please enter a job role or industry first.'); return; }
+  quizTopic = document.getElementById('quiz-topic').value.trim();
+  if (!quizTopic) { alert('Please enter a job role or industry first.'); return; }
   show('screen-loading');
   const res  = await fetch('/interview/generate', {
-    method: 'POST', body: new URLSearchParams({ topic })
+    method: 'POST', body: new URLSearchParams({ topic: quizTopic })
   });
   const data = await res.json();
   if (data.error) { alert('Something went wrong. Please try again.'); show('screen-setup'); return; }
@@ -101,7 +100,7 @@ async function startQuiz() {
 }
 
 function renderQuestion() {
-  const q = questions[current];
+  const q     = questions[current];
   const total = questions.length;
   document.getElementById('progress-fill').style.width  = ((current / total) * 100) + '%';
   document.getElementById('progress-label').textContent = `Question ${current + 1} of ${total}`;
@@ -122,7 +121,6 @@ function renderQuestion() {
 }
 
 function selectAnswer(answer, btn) {
-  // Disable all options
   document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
   const q = questions[current];
   userAnswers[current] = answer;
@@ -140,7 +138,7 @@ function selectAnswer(answer, btn) {
 }
 
 function showExplanation() {
-  const q = questions[current];
+  const q   = questions[current];
   const box = document.getElementById('explanation-box');
   box.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
   box.style.display = 'block';
@@ -153,16 +151,23 @@ function nextQuestion() {
   else { showResults(); }
 }
 
-function showResults() {
+async function showResults() {
   show('screen-results');
-  const pct   = Math.round((score / questions.length) * 100);
+
+  // Save score to database
+  await fetch('/interview/save', {
+    method: 'POST',
+    body: new URLSearchParams({ topic: quizTopic, score: score, total: questions.length })
+  });
+
+  const pct    = Math.round((score / questions.length) * 100);
   const circle = document.getElementById('results-circle');
   document.getElementById('results-pct').textContent = pct + '%';
   circle.className = 'results-score-circle ' + (pct >= 70 ? 'good' : pct >= 40 ? 'ok' : 'low');
   document.getElementById('results-title').textContent =
     pct >= 70 ? '🎉 Great job!' : pct >= 40 ? '👍 Good effort!' : '📚 Keep practising!';
   document.getElementById('results-msg').textContent =
-    `You got ${score} out of ${questions.length} questions correct.`;
+    `You got ${score} out of ${questions.length} correct. Score saved to your dashboard.`;
 
   const bd = document.getElementById('results-breakdown');
   bd.innerHTML = questions.map((q, i) => `
@@ -170,7 +175,9 @@ function showResults() {
       <div class="r-icon">${userAnswers[i] === q.correctAnswer ? '✓' : '✗'}</div>
       <div>
         <div class="r-q">${q.question}</div>
-        ${userAnswers[i] !== q.correctAnswer ? `<div class="r-ans">Correct: <strong>${q.correctAnswer}</strong></div>` : ''}
+        ${userAnswers[i] !== q.correctAnswer
+          ? `<div class="r-ans">Correct answer: <strong>${q.correctAnswer}</strong></div>`
+          : ''}
       </div>
     </div>
   `).join('');

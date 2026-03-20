@@ -39,7 +39,9 @@ def login_required(view):
 # ── Database ───────────────────────────────────────────────────
 
 def get_db():
-    return sqlite3.connect(DB_NAME)
+    conn = sqlite3.connect(DB_NAME)
+    conn.row_factory = sqlite3.Row
+    return conn
 
 def init_db():
     with get_db() as db:
@@ -48,6 +50,17 @@ def init_db():
                 id       INTEGER PRIMARY KEY AUTOINCREMENT,
                 email    TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL
+            )
+        """)
+        db.execute("""
+            CREATE TABLE IF NOT EXISTS quiz_results (
+                id         INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id    INTEGER NOT NULL,
+                topic      TEXT NOT NULL,
+                score      REAL NOT NULL,
+                total      INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
             )
         """)
 
@@ -87,34 +100,28 @@ Conversation:
     return call_gemini(prompt)
 
 
-def gemini_analyse_cv(cv_text):
+def gemini_improve_cv_text(text, field_type):
+    """Improve a piece of CV text — summary, description, experience, etc."""
+    context = {
+        'summary':    'a professional summary for a CV',
+        'experience': 'a work experience description for a CV',
+        'education':  'an education entry description for a CV',
+        'project':    'a project description for a CV',
+    }.get(field_type, 'a section of a CV')
+
     prompt = f"""
-You are a professional career advisor and CV expert.
+You are a professional CV writer. Improve the following text which is {context}.
 
-Analyse the CV below and provide:
+Original text:
+{text}
 
-## 1. CV Summary
-2–3 sentence summary of who this person is.
-
-## 2. Key Strengths
-Their top 4–6 strengths from their CV.
-
-## 3. Skill Gaps
-What skills or experience are they missing to be more employable?
-
-## 4. Best Career Matches
-3–5 careers that suit them. For each:
-- Why it fits their background
-- Entry-level role they could apply for now
-- One thing to strengthen their application
-
-## 5. Immediate Next Steps
-3 specific actions they can take this week.
-
-Be honest, practical, and encouraging. Use Markdown throughout.
-
-CV:
-{cv_text[:4000]}
+Instructions:
+- Make it more professional, specific, and impactful
+- Use strong action verbs (e.g. developed, led, built, improved, achieved)
+- Be concise but specific — quantify achievements where possible
+- Do NOT change the core facts — only improve the language and structure
+- Keep it to a similar length as the original
+- Return ONLY the improved text, nothing else — no explanations, no labels
 """
     return call_gemini(prompt)
 
@@ -138,14 +145,13 @@ Return ONLY a valid JSON object in this exact format, no extra text:
     try:
         response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
         text = response.text.strip()
-        # Strip markdown code fences if present
         if text.startswith("```"):
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
         data = json.loads(text.strip())
         return data["questions"]
-    except Exception as e:
+    except Exception:
         return None
 
 
@@ -205,12 +211,13 @@ def login():
         password = request.form["password"]
         with get_db() as db:
             user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
-        if not user or not check_password_hash(user[2], password):
+        if not user or not check_password_hash(user["password"], password):
             flash("Invalid email or password.", "error")
             return redirect(url_for("login"))
         session.clear()
-        session["user_id"] = user[0]
-        session["history"] = []
+        session["user_id"]    = user["id"]
+        session["user_email"] = user["email"]
+        session["history"]    = []
         return redirect(url_for("dashboard"))
     return render_template("login.html")
 
@@ -225,7 +232,12 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    with get_db() as db:
+        results = db.execute(
+            "SELECT * FROM quiz_results WHERE user_id = ? ORDER BY created_at DESC LIMIT 10",
+            (session["user_id"],)
+        ).fetchall()
+    return render_template("dashboard.html", results=results, email=session.get("user_email", ""))
 
 
 @app.route("/chat")
@@ -253,21 +265,44 @@ def chat_send():
     return jsonify({"reply": reply})
 
 
+# CV Builder page
 @app.route("/cv")
 @login_required
 def cv():
     return render_template("cv.html")
 
 
+# CV Builder — AI improve a text field
+@app.route("/cv/improve", methods=["POST"])
+@login_required
+def cv_improve():
+    text       = request.form.get("text", "").strip()
+    field_type = request.form.get("type", "summary").strip()
+    if not text:
+        return jsonify({"improved": "Please write some content first."})
+    improved = gemini_improve_cv_text(text, field_type)
+    return jsonify({"improved": improved})
+
+
+# Keep the old /cv/analyse route so nothing else breaks
 @app.route("/cv/analyse", methods=["POST"])
 @login_required
 def cv_analyse():
     cv_text = request.form.get("cv_text", "").strip()
-    if not cv_text:
-        return jsonify({"analysis": "Please provide your CV text."})
-    if len(cv_text) < 50:
-        return jsonify({"analysis": "Your CV seems too short. Please paste the full content."})
-    return jsonify({"analysis": gemini_analyse_cv(cv_text)})
+    if not cv_text or len(cv_text) < 50:
+        return jsonify({"analysis": "Please provide your full CV text."})
+    prompt = f"""
+You are a professional career advisor and CV expert.
+Analyse the CV below and provide:
+## 1. CV Summary
+## 2. Key Strengths
+## 3. Skill Gaps
+## 4. Best Career Matches
+## 5. Immediate Next Steps
+CV:
+{cv_text[:4000]}
+"""
+    return jsonify({"analysis": call_gemini(prompt)})
 
 
 @app.route("/interview")
@@ -286,6 +321,23 @@ def interview_generate():
     if not questions:
         return jsonify({"error": "Failed to generate questions. Please try again."})
     return jsonify({"questions": questions})
+
+
+@app.route("/interview/save", methods=["POST"])
+@login_required
+def interview_save():
+    topic = request.form.get("topic", "General").strip()
+    score = request.form.get("score", 0)
+    total = request.form.get("total", 10)
+    try:
+        with get_db() as db:
+            db.execute(
+                "INSERT INTO quiz_results (user_id, topic, score, total) VALUES (?, ?, ?, ?)",
+                (session["user_id"], topic, float(score), int(total))
+            )
+        return jsonify({"ok": True})
+    except Exception as e:
+        return jsonify({"ok": False, "error": str(e)})
 
 
 @app.route("/cover-letter")
@@ -311,3 +363,6 @@ def cover_letter_generate():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+
+
