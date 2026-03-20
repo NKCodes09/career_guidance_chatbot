@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="page">
+  <div class="page-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="tool-shell">
+    <div class="tool-card">
+
+      <div class="tool-header">
+        <div>
+          <h2 class="tool-title">📄 CV Analyser</h2>
+          <p class="tool-sub">Paste your CV and get a full AI-powered career breakdown.</p>
+        </div>
+        <a href="/dashboard" class="btn ghost">← Dashboard</a>
+      </div>
+
+      <div class="cv-panel">
+        <div class="cv-intro">
+          <span class="cv-icon">📄</span>
+          <h3>Analyse Your CV</h3>
+          <p>Paste your full CV below — the AI will identify your strengths, skill gaps, best career matches, and give you specific next steps.</p>
+        </div>
+
+        <textarea id="cv-text" class="cv-textarea"
+          placeholder="Paste your full CV here...&#10;&#10;Example:&#10;Name: John Smith&#10;Education: BSc Computer Science, University of Hertfordshire (2024)&#10;Skills: Python, JavaScript, teamwork, problem solving&#10;Experience: 6-month internship at XYZ Ltd — built internal tools using Flask..."></textarea>
+
+        <button class="btn primary block" id="cv-btn" onclick="analyseCV()">Analyse My CV</button>
+
+        <div id="cv-loading" style="display:none;text-align:center;padding:30px 0;color:rgba(255,255,255,0.6);">
+          <div class="typing-dots big"><span></span><span></span><span></span></div>
+          <p style="margin-top:12px;font-size:14px;">Analysing your CV…</p>
+        </div>
+
+        <div id="cv-result" style="display:none;" class="cv-result">
+          <div class="cv-result-header">📊 Your CV Analysis</div>
+          <div id="cv-result-body" class="cv-result-body md-content"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script>
+marked.setOptions({ breaks: true, gfm: true });
+
+async function analyseCV() {
+  const cv = document.getElementById('cv-text').value.trim();
+  if (!cv) { alert('Please paste your CV first.'); return; }
+  document.getElementById('cv-result').style.display  = 'none';
+  document.getElementById('cv-loading').style.display = 'block';
+  document.getElementById('cv-btn').disabled = true;
+  const res  = await fetch('/cv/analyse', { method:'POST', body: new URLSearchParams({ cv_text: cv }) });
+  const data = await res.json();
+  document.getElementById('cv-loading').style.display  = 'none';
+  document.getElementById('cv-result').style.display   = 'block';
+  document.getElementById('cv-result-body').innerHTML  = marked.parse(data.analysis);
+  document.getElementById('cv-btn').disabled = false;
+}
+</script>
+{% endblock %}

@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="page">
+  <div class="page-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="tool-shell">
+    <div class="tool-card">
+
+      <div class="tool-header">
+        <div>
+          <h2 class="tool-title">✉️ Cover Letter Generator</h2>
+          <p class="tool-sub">Generate a tailored, professional cover letter in seconds.</p>
+        </div>
+        <a href="/dashboard" class="btn ghost">← Dashboard</a>
+      </div>
+
+      <div class="cl-body">
+        <div class="cl-inputs">
+
+          <div class="field-group">
+            <label class="field-label">Your Name</label>
+            <input id="cl-name" class="tool-input" type="text" placeholder="e.g. John Smith">
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Job Title You're Applying For</label>
+            <input id="cl-jobtitle" class="tool-input" type="text" placeholder="e.g. Software Engineer, Marketing Manager">
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Company Name</label>
+            <input id="cl-company" class="tool-input" type="text" placeholder="e.g. Google, NHS, Tesco">
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Paste the Job Description</label>
+            <textarea id="cl-jd" class="cv-textarea" style="min-height:140px;"
+              placeholder="Paste the full job description here — the AI uses this to tailor your letter…"></textarea>
+          </div>
+
+          <div class="field-group">
+            <label class="field-label">Your Key Skills / Experience (brief summary)</label>
+            <textarea id="cl-skills" class="cv-textarea" style="min-height:100px;"
+              placeholder="e.g. 3 years Python experience, BSc Computer Science, led a team of 5, strong communication skills…"></textarea>
+          </div>
+
+          <button class="btn primary block" id="cl-btn" onclick="generateCoverLetter()">Generate Cover Letter</button>
+        </div>
+
+        <div id="cl-loading" style="display:none;text-align:center;padding:30px 0;color:rgba(255,255,255,0.6);">
+          <div class="typing-dots big"><span></span><span></span><span></span></div>
+          <p style="margin-top:12px;font-size:14px;">Writing your cover letter…</p>
+        </div>
+
+        <div id="cl-result" style="display:none;" class="cl-result">
+          <div class="cl-result-header">
+            <span>✉️ Your Cover Letter</span>
+            <button class="btn ghost small" onclick="copyLetter()">Copy Text</button>
+          </div>
+          <div id="cl-result-body" class="cl-result-body"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+async function generateCoverLetter() {
+  const name     = document.getElementById('cl-name').value.trim();
+  const jobtitle = document.getElementById('cl-jobtitle').value.trim();
+  const company  = document.getElementById('cl-company').value.trim();
+  const jd       = document.getElementById('cl-jd').value.trim();
+  const skills   = document.getElementById('cl-skills').value.trim();
+
+  if (!jobtitle || !company || !jd) {
+    alert('Please fill in the Job Title, Company Name, and Job Description at minimum.');
+    return;
+  }
+
+  document.getElementById('cl-result').style.display  = 'none';
+  document.getElementById('cl-loading').style.display = 'block';
+  document.getElementById('cl-btn').disabled = true;
+
+  const res  = await fetch('/cover-letter/generate', {
+    method: 'POST',
+    body: new URLSearchParams({ name, jobtitle, company, jd, skills })
+  });
+  const data = await res.json();
+
+  document.getElementById('cl-loading').style.display = 'none';
+  document.getElementById('cl-result').style.display  = 'block';
+  document.getElementById('cl-result-body').innerText = data.letter;
+  document.getElementById('cl-btn').disabled = false;
+}
+
+function copyLetter() {
+  const text = document.getElementById('cl-result-body').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy Text', 2000);
+  });
+}
+</script>
+
+{% endblock %}

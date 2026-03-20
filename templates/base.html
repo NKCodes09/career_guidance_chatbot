@@ -1,75 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
-  <title>AI Career Chatbot</title>
+  <title>AI Career Coach</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Google Font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Main CSS -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <!-- Favicons -->
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-
-  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
-
-  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
-
+  <link rel="icon" type="image/png" sizes="32x32"  href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16"  href="{{ url_for('static', filename='favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
-
 </head>
-
 <body>
 
-  <!-- =========================
-       Premium Navbar
-  ========================== -->
-  <header class="navbar">
-    <div class="nav-inner">
-      <div class="logo">
-        <span class="logo-accent">AI</span> Career
-      </div>
-
-      <nav class="nav-links">
-        {% if session.get("user_id") %}
-        <a href="/chat">Chat</a>
+<header class="navbar">
+  <div class="nav-inner">
+    <a href="/" class="logo"><span class="logo-accent">AI</span> Career</a>
+    <nav class="nav-links">
+      {% if session.get("user_id") %}
+        <a href="/dashboard"    class="nav-link">Dashboard</a>
+        <a href="/chat"         class="nav-link">Chat</a>
+        <a href="/interview"    class="nav-link">Interview</a>
+        <a href="/cover-letter" class="nav-link">Cover Letter</a>
         <a href="/logout" class="btn ghost small">Logout</a>
-        {% else %}
-        <a href="/login">Login</a>
+      {% else %}
+        <a href="/login"  class="nav-link">Login</a>
         <a href="/signup" class="btn ghost small">Sign Up</a>
-        {% endif %}
-      </nav>
-    </div>
-  </header>
-
-  <!-- =========================
-       Flash Messages
-  ========================== -->
-  {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-  <div class="flash-wrapper">
-    {% for category, message in messages %}
-    <div class="flash {{ category }}">
-      {{ message }}
-    </div>
-    {% endfor %}
+      {% endif %}
+    </nav>
+    <button class="nav-burger" onclick="document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-  {% endif %}
-  {% endwith %}
+  <div class="nav-mobile" id="nav-mobile">
+    {% if session.get("user_id") %}
+      <a href="/dashboard">Dashboard</a>
+      <a href="/chat">Career Chat</a>
+      <a href="/interview">Interview Prep</a>
+      <a href="/cover-letter">Cover Letter</a>
+      <a href="/logout">Logout</a>
+    {% else %}
+      <a href="/login">Login</a>
+      <a href="/signup">Sign Up</a>
+    {% endif %}
+  </div>
+</header>
 
-  <!-- =========================
-       Page Content
-  ========================== -->
-  <main>
-    {% block content %}{% endblock %}
-  </main>
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-wrapper">
+  {% for category, message in messages %}
+  <div class="flash {{ category }}">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
 
+<main>{% block content %}{% endblock %}</main>
 </body>
-
 </html>
-

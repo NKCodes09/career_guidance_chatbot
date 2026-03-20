@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="dash-page">
+  <div class="page-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
+
+  <div class="dash-inner">
+
+    <!-- Welcome header -->
+    <div class="dash-header">
+      <div>
+        <h1 class="dash-title">Welcome back 👋</h1>
+        <p class="dash-sub">What would you like to work on today?</p>
+      </div>
+    </div>
+
+    <!-- Feature cards -->
+    <div class="dash-grid">
+
+      <a href="/chat" class="dash-card">
+        <div class="dash-card-icon" style="background:rgba(120,80,255,0.18);">💬</div>
+        <div class="dash-card-body">
+          <h3>Career Chat</h3>
+          <p>Talk to the AI about your goals, interests, and get a personalised career plan with 30/60/90 day steps.</p>
+        </div>
+        <div class="dash-card-arrow">→</div>
+      </a>
+
+      <a href="/cv" class="dash-card">
+        <div class="dash-card-icon" style="background:rgba(0,220,255,0.15);">📄</div>
+        <div class="dash-card-body">
+          <h3>CV Analyser</h3>
+          <p>Paste your CV and get a full AI breakdown — strengths, skill gaps, best career matches, and next steps.</p>
+        </div>
+        <div class="dash-card-arrow">→</div>
+      </a>
+
+      <a href="/interview" class="dash-card">
+        <div class="dash-card-icon" style="background:rgba(255,180,0,0.15);">🎤</div>
+        <div class="dash-card-body">
+          <h3>Interview Prep</h3>
+          <p>Practice with AI-generated multiple choice questions tailored to any role or industry you choose.</p>
+        </div>
+        <div class="dash-card-arrow">→</div>
+      </a>
+
+      <a href="/cover-letter" class="dash-card">
+        <div class="dash-card-icon" style="background:rgba(60,220,150,0.15);">✉️</div>
+        <div class="dash-card-body">
+          <h3>Cover Letter Generator</h3>
+          <p>Generate a compelling, personalised cover letter for any job in seconds — just paste the job description.</p>
+        </div>
+        <div class="dash-card-arrow">→</div>
+      </a>
+
+    </div>
+
+    <!-- Quick tip -->
+    <div class="dash-tip">
+      <span class="dash-tip-icon">💡</span>
+      <p><strong>Tip:</strong> Start with the Career Chat if you're unsure what direction to take — the AI will ask you the right questions.</p>
+    </div>
+
+  </div>
+</section>
+
+{% endblock %}
