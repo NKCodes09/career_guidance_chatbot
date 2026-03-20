@@ -10,6 +10,8 @@
 
   <div class="chat-shell">
     <div class="chat-card">
+
+      <!-- Header — unchanged from your original -->
       <div class="chat-top">
         <div class="chat-title">
           <h2>AI Career Assistant</h2>
@@ -18,40 +20,101 @@
         <a href="/logout" class="btn ghost">Logout</a>
       </div>
 
-      <div id="chat-box" class="chat-box"></div>
+      <!-- NEW: Tabs -->
+      <div class="chat-tabs">
+        <button class="chat-tab active" onclick="switchTab('chat', this)">💬 Career Chat</button>
+        <button class="chat-tab" onclick="switchTab('cv', this)">📄 CV Analyser</button>
+      </div>
 
-      <form id="chat-form" class="chat-form">
-        <input id="message" type="text"
-               placeholder="Tell me your interests, education/skills, and goals (any career)…"
-               required>
-        <button class="btn primary" type="submit">Send</button>
-      </form>
+      <!-- TAB 1: Original chat — unchanged -->
+      <div id="tab-chat">
+        <div id="chat-box" class="chat-box"></div>
+
+        <form id="chat-form" class="chat-form">
+          <input id="message" type="text"
+                 placeholder="Tell me your interests, education/skills, and goals (any career)…"
+                 autocomplete="off"
+                 required>
+          <button class="btn primary" type="submit">Send</button>
+        </form>
+      </div>
+
+      <!-- TAB 2: CV Analyser -->
+      <div id="tab-cv" style="display:none;">
+        <div class="cv-panel">
+
+          <div class="cv-intro">
+            <span class="cv-icon">📄</span>
+            <h3>CV Analyser</h3>
+            <p>Paste your CV below — AI will analyse your skills and suggest the best career paths for you.</p>
+          </div>
+
+          <textarea id="cv-text" class="cv-textarea"
+            placeholder="Paste your full CV here...&#10;&#10;Example:&#10;Name: John Smith&#10;Education: BSc Computer Science&#10;Skills: Python, teamwork, problem solving&#10;Experience: 6-month internship at..."></textarea>
+
+          <button class="btn primary block" id="cv-btn" onclick="analyseCV()">Analyse My CV</button>
+
+          <div id="cv-loading" style="display:none; text-align:center; padding:20px 0; color:rgba(255,255,255,0.6);">
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+            <p style="margin-top:10px; font-size:14px;">Analysing your CV…</p>
+          </div>
+
+          <div id="cv-result" style="display:none;" class="cv-result">
+            <div class="cv-result-header">📊 Your CV Analysis</div>
+            <div id="cv-result-body" class="cv-result-body md-content"></div>
+          </div>
+
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
+<!-- marked.js: turns AI markdown into proper headings/bullets -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+
 <script>
-const form = document.getElementById("chat-form");
-const box = document.getElementById("chat-box");
+marked.setOptions({ breaks: true, gfm: true });
+
+// ── Tab switching ──────────────────────────────
+function switchTab(name, btn) {
+  document.querySelectorAll(".chat-tab").forEach(t => t.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("tab-chat").style.display = name === "chat" ? "block" : "none";
+  document.getElementById("tab-cv").style.display   = name === "cv"   ? "block" : "none";
+}
+
+// ── Career Chat ────────────────────────────────
+const form  = document.getElementById("chat-form");
+const box   = document.getElementById("chat-box");
 const input = document.getElementById("message");
 
 function add(role, text) {
-  const div = document.createElement("div");
+  const div    = document.createElement("div");
   div.className = `message ${role}`;
 
-  const label = role === "user" ? "You" : "AI";
-  const safeText = (text || "").replace(/\n/g, "<br>");
+  const label  = role === "user" ? "You" : "AI";
+  const bubble = document.createElement("div");
+  bubble.className = "bubble md-content";
 
-  div.innerHTML = `<strong>${label}</strong><div class="bubble">${safeText}</div>`;
+  if (role === "user") {
+    bubble.textContent = text;
+  } else {
+    bubble.innerHTML = marked.parse(text);
+  }
+
+  div.innerHTML = `<strong>${label}</strong>`;
+  div.appendChild(bubble);
   box.appendChild(div);
   box.scrollTop = box.scrollHeight;
 }
 
-function typing() {
+function showTyping() {
   const t = document.createElement("div");
   t.id = "typing";
-  t.className = "message bot typing";
-  t.innerHTML = `<strong>AI</strong><div class="bubble">Typing…</div>`;
+  t.className = "message bot";
+  t.innerHTML = `<strong>AI</strong><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
   box.appendChild(t);
   box.scrollTop = box.scrollHeight;
 }
@@ -63,19 +126,40 @@ form.addEventListener("submit", async (e) => {
 
   add("user", text);
   input.value = "";
-  typing();
+  showTyping();
 
-  const res = await fetch("/chat/send", {
+  const res  = await fetch("/chat/send", {
     method: "POST",
     body: new URLSearchParams({ message: text })
   });
-
   const data = await res.json();
+
   const typingEl = document.getElementById("typing");
   if (typingEl) typingEl.remove();
 
   add("bot", data.reply);
 });
+
+// ── CV Analyser ────────────────────────────────
+async function analyseCV() {
+  const cvText = document.getElementById("cv-text").value.trim();
+  if (!cvText) { alert("Please paste your CV first."); return; }
+
+  document.getElementById("cv-result").style.display  = "none";
+  document.getElementById("cv-loading").style.display = "block";
+  document.getElementById("cv-btn").disabled = true;
+
+  const res  = await fetch("/cv/analyse", {
+    method: "POST",
+    body: new URLSearchParams({ cv_text: cvText })
+  });
+  const data = await res.json();
+
+  document.getElementById("cv-loading").style.display  = "none";
+  document.getElementById("cv-result").style.display   = "block";
+  document.getElementById("cv-result-body").innerHTML  = marked.parse(data.analysis);
+  document.getElementById("cv-btn").disabled = false;
+}
 </script>
 
 {% endblock %}

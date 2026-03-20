@@ -4,3 +4,4 @@ uploads/
 __pycache__/
 .venv/
 database.db
+.vscode
