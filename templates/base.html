@@ -22,6 +22,7 @@
       {% if session.get("user_id") %}
         <a href="/dashboard"    class="nav-link">Dashboard</a>
         <a href="/chat"         class="nav-link">Chat</a>
+        <a href="/cv"           class="nav-link">CV Builder</a>
         <a href="/interview"    class="nav-link">Interview</a>
         <a href="/cover-letter" class="nav-link">Cover Letter</a>
         <a href="/logout" class="btn ghost small">Logout</a>
@@ -38,6 +39,7 @@
     {% if session.get("user_id") %}
       <a href="/dashboard">Dashboard</a>
       <a href="/chat">Career Chat</a>
+      <a href="/cv">CV Builder</a>
       <a href="/interview">Interview Prep</a>
       <a href="/cover-letter">Cover Letter</a>
       <a href="/logout">Logout</a>
