@@ -284,25 +284,6 @@ def cv_improve():
     return jsonify({"improved": improved})
 
 
-# Keep the old /cv/analyse route so nothing else breaks
-@app.route("/cv/analyse", methods=["POST"])
-@login_required
-def cv_analyse():
-    cv_text = request.form.get("cv_text", "").strip()
-    if not cv_text or len(cv_text) < 50:
-        return jsonify({"analysis": "Please provide your full CV text."})
-    prompt = f"""
-You are a professional career advisor and CV expert.
-Analyse the CV below and provide:
-## 1. CV Summary
-## 2. Key Strengths
-## 3. Skill Gaps
-## 4. Best Career Matches
-## 5. Immediate Next Steps
-CV:
-{cv_text[:4000]}
-"""
-    return jsonify({"analysis": call_gemini(prompt)})
 
 
 @app.route("/interview")
