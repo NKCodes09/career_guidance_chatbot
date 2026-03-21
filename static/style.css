@@ -143,64 +143,60 @@ a { color: inherit; text-decoration: none; }
 .small-link:hover { color: #fff; text-decoration: underline; }
 
 /* ── Landing hero ────────────────────────────── */
+/* ── Hero — full-width image background ──────── */
 .landing {
-  position: relative; min-height: calc(100vh - 60px);
+  position: relative;
+  min-height: calc(100vh - 60px);
   display: flex; align-items: center; justify-content: center;
-  padding: 64px 24px;
-  background:
-    radial-gradient(1200px 600px at 20% 10%, rgba(120,80,255,.25), transparent 55%),
-    radial-gradient(900px 500px at 80% 30%, rgba(0,220,255,.18), transparent 55%),
-    radial-gradient(900px 500px at 70% 80%, rgba(255,110,180,.14), transparent 55%),
-    var(--bg);
+  padding: 80px 24px 80px;
   overflow: hidden;
+  background: var(--bg);
 }
-.landing-inner {
-  width: min(1150px,100%); position: relative; z-index: 1;
-  display: grid; grid-template-columns: 1.1fr .9fr; gap: 48px; align-items: center;
+
+/* Robot image fills the right ~60% of the hero */
+.hero-img-bg {
+  position: absolute; inset: 0;
+  background: url('/static/hero-bg.webp') center right / cover no-repeat;
+  background-position: 70% center;
+  opacity: .55;
+  pointer-events: none;
 }
+
+/* Dark gradient from left — makes text readable over the image */
+.hero-img-overlay {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    linear-gradient(90deg,
+      rgba(7,10,18,1)   0%,
+      rgba(7,10,18,.95) 35%,
+      rgba(7,10,18,.6)  60%,
+      rgba(7,10,18,.15) 100%),
+    radial-gradient(900px 600px at 5% 50%, rgba(120,80,255,.22), transparent 60%);
+}
+
+/* Single centred column for content */
+.hero-center {
+  position: relative; z-index: 1;
+  width: min(640px, 100%);
+  margin-right: auto;
+}
+
 .pill {
   display: inline-flex; padding: 8px 14px; border-radius: 999px;
   background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.12);
   color: var(--muted); font-size: 13px;
 }
 .hero-title {
-  margin: 16px 0 12px; font-size: clamp(34px,4vw,52px);
-  line-height: 1.08; letter-spacing: -.7px; font-weight: 800;
+  margin: 18px 0 14px; font-size: clamp(36px,4.5vw,58px);
+  line-height: 1.06; letter-spacing: -.8px; font-weight: 900;
 }
-.hero-highlight { display: block; color: rgba(255,255,255,.72); font-weight: 600; margin-top: 8px; }
-.hero-subtitle  { font-size: 16px; color: var(--muted); line-height: 1.65; max-width: 52ch; margin-bottom: 24px; }
-.hero-cta       { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 28px; }
+.hero-highlight { display: block; color: rgba(255,255,255,.65); font-weight: 700; margin-top: 6px; }
+.hero-subtitle  { font-size: 17px; color: var(--muted); line-height: 1.7; max-width: 48ch; margin-bottom: 28px; }
+.hero-cta       { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 32px; }
 .hero-stats     { display: flex; gap: 14px; flex-wrap: wrap; }
-.stat           { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); }
+.stat           { padding: 12px 16px; border-radius: 14px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(8px); }
 .stat-num       { font-weight: 800; font-size: 17px; }
 .stat-label     { font-size: 12px; color: var(--muted); margin-top: 3px; }
-
-/* preview card */
-.hero-right     { position: relative; }
-.preview-card   { background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.14); border-radius: 18px; box-shadow: var(--shadow); overflow: hidden; }
-.preview-top    { display: flex; align-items: center; gap: 7px; padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.18); }
-.dot            { width: 10px; height: 10px; border-radius: 999px; }
-.dot.red        { background: #ff5f57; } .dot.yellow { background: #febc2e; } .dot.green { background: #28c840; }
-.preview-title  { margin-left: 8px; font-size: 12px; color: rgba(255,255,255,.7); }
-.preview-body   { padding: 16px; }
-.msg            { display: flex; margin: 9px 0; }
-.msg.user       { justify-content: flex-end; }
-.msg.bot        { justify-content: flex-start; }
-.bubble         { max-width: 92%; padding: 10px 13px; border-radius: 14px; line-height: 1.5; font-size: 13px; }
-.msg.user .bubble { background: rgba(120,80,255,.22); border: 1px solid rgba(120,80,255,.35); }
-.msg.bot  .bubble { background: rgba(0,220,255,.10);  border: 1px solid rgba(0,220,255,.20); }
-.mini-cards     { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
-.mini           { padding: 6px 10px; font-size: 12px; border-radius: 999px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.12); color: rgba(255,255,255,.75); }
-.floating-badge {
-  position: absolute; padding: 9px 13px; border-radius: 999px;
-  background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.15);
-  font-size: 12px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,.25);
-  animation: floaty 4.5s ease-in-out infinite;
-}
-.badge-1 { top: 16px;  right: 16px;  animation-delay: 0s; }
-.badge-2 { bottom: 16px; left: 20px; animation-delay: 1s; }
-.badge-3 { top: 52%; right: -8px;    animation-delay: 2s; }
-@keyframes floaty { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
 
 /* ── Landing sections ────────────────────────── */
 .lp-section { padding: 72px 24px; }
@@ -449,9 +445,8 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Responsive ──────────────────────────────── */
 @media (max-width: 900px) {
-  .landing-inner { grid-template-columns: 1fr; }
-  .hero-right { order: -1; }
-  .badge-3    { display: none; }
+  .hero-img-bg { background-position: 80% center; opacity: .35; }
+  .hero-center { width: 100%; margin-right: 0; }
   .chat-box   { height: 55vh; }
 }
 @media (max-width: 600px) {
