@@ -12,12 +12,36 @@
         <div class="card">
             <div class="card-pad">
                 <h2 class="card-title">Create Account</h2>
-                <p class="card-subtitle">Make an account to start personalized guidance.</p>
+                <p class="card-subtitle">Free to use. No credit card needed.</p>
 
-                <form method="POST" class="form">
-                    <input class="input" type="email" name="email" placeholder="Email" required>
-                    <input class="input" type="password" name="password" placeholder="Password (min 6 chars)" required>
-                    <button class="btn primary block" type="submit">Sign Up</button>
+                <form method="POST" class="form" id="signup-form" novalidate>
+
+                    <div class="field-wrap">
+                        <input class="input" type="email" name="email" id="email"
+                               placeholder="Email address" autocomplete="email">
+                        <span class="field-error" id="email-error"></span>
+                    </div>
+
+                    <div class="field-wrap">
+                        <input class="input" type="password" name="password" id="password"
+                               placeholder="Password (min 6 characters)" autocomplete="new-password">
+                        <span class="field-error" id="password-error"></span>
+                        <!-- Strength bar -->
+                        <div class="strength-bar-wrap" id="strength-wrap" style="display:none;">
+                            <div class="strength-bar">
+                                <div class="strength-fill" id="strength-fill"></div>
+                            </div>
+                            <span class="strength-label" id="strength-label"></span>
+                        </div>
+                    </div>
+
+                    <div class="field-wrap">
+                        <input class="input" type="password" id="confirm"
+                               placeholder="Confirm password" autocomplete="new-password">
+                        <span class="field-error" id="confirm-error"></span>
+                    </div>
+
+                    <button class="btn primary block" type="submit">Create Account</button>
                 </form>
 
                 <div class="helper-row">
@@ -28,5 +52,96 @@
         </div>
     </div>
 </section>
+
+<script>
+const form     = document.getElementById('signup-form');
+const email    = document.getElementById('email');
+const password = document.getElementById('password');
+const confirm  = document.getElementById('confirm');
+
+function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.style.display = msg ? 'block' : 'none';
+    const inputId = id.replace('-error', '');
+    const input   = document.getElementById(inputId);
+    if (input) input.classList.toggle('input-error', !!msg);
+}
+
+/* ── Email ────────────────────────────────────── */
+function validateEmail() {
+    const v = email.value.trim();
+    if (!v)                                              { showError('email-error', 'Email is required.');                  return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v))         { showError('email-error', 'Please enter a valid email address.'); return false; }
+    showError('email-error', ''); return true;
+}
+
+/* ── Password strength ────────────────────────── */
+function passwordStrength(val) {
+    let score = 0;
+    if (val.length >= 6)                    score++;
+    if (val.length >= 10)                   score++;
+    if (/[A-Z]/.test(val))                  score++;
+    if (/[0-9]/.test(val))                  score++;
+    if (/[^A-Za-z0-9]/.test(val))          score++;
+    return score;   // 0–5
+}
+
+function updateStrength() {
+    const val   = password.value;
+    const wrap  = document.getElementById('strength-wrap');
+    const fill  = document.getElementById('strength-fill');
+    const label = document.getElementById('strength-label');
+    if (!val) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'flex';
+    const score = passwordStrength(val);
+    const levels = [
+        { pct: 20,  color: '#ff5a78', text: 'Very weak'  },
+        { pct: 40,  color: '#ff9a3c', text: 'Weak'       },
+        { pct: 60,  color: '#ffbe32', text: 'Fair'       },
+        { pct: 80,  color: '#3cdc96', text: 'Strong'     },
+        { pct: 100, color: '#3cdc96', text: 'Very strong'},
+    ];
+    const level = levels[Math.min(score - 1, 4)] || levels[0];
+    fill.style.width      = level.pct + '%';
+    fill.style.background = level.color;
+    label.textContent     = level.text;
+    label.style.color     = level.color;
+}
+
+function validatePassword() {
+    const v = password.value;
+    if (!v)          { showError('password-error', 'Password is required.');                  return false; }
+    if (v.length < 6){ showError('password-error', 'Password must be at least 6 characters.'); return false; }
+    showError('password-error', ''); return true;
+}
+
+/* ── Confirm password ─────────────────────────── */
+function validateConfirm() {
+    if (!confirm.value)                        { showError('confirm-error', 'Please confirm your password.'); return false; }
+    if (confirm.value !== password.value)      { showError('confirm-error', 'Passwords do not match.');       return false; }
+    showError('confirm-error', ''); return true;
+}
+
+/* ── Event listeners ──────────────────────────── */
+email.addEventListener('blur',  validateEmail);
+email.addEventListener('input', () => { if (email.classList.contains('input-error')) validateEmail(); });
+
+password.addEventListener('input', () => {
+    updateStrength();
+    if (password.classList.contains('input-error')) validatePassword();
+    if (confirm.value) validateConfirm();
+});
+password.addEventListener('blur', validatePassword);
+
+confirm.addEventListener('blur',  validateConfirm);
+confirm.addEventListener('input', () => { if (confirm.classList.contains('input-error')) validateConfirm(); });
+
+/* ── Submit ───────────────────────────────────── */
+form.addEventListener('submit', e => {
+    const ok = validateEmail() & validatePassword() & validateConfirm();
+    if (!ok) e.preventDefault();
+});
+</script>
 
 {% endblock %}
