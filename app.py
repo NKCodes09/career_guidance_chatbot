@@ -9,25 +9,27 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai.errors import ClientError
 
-# ── Setup ──────────────────────────────────────────────────────
+# ── App Setup ──────────────────────────────────────────────────
 
-load_dotenv()
+load_dotenv()  # Load environment variables from .env file
 
 API_KEY = os.getenv("GOOGLE_API_KEY")
 if not API_KEY:
     raise RuntimeError("GOOGLE_API_KEY not set")
 
+# Initialise the Gemini AI client
 client     = genai.Client(api_key=API_KEY)
 MODEL_NAME = "models/gemini-2.5-flash"
 
 app = Flask(__name__)
-app.secret_key = "replace_this_with_random_secret"
+app.secret_key = "replace_this_with_random_secret"  # Used to sign/encrypt session cookies
 
 DB_NAME = "database.db"
 
-# ── Auth decorator ─────────────────────────────────────────────
+# ── Auth Decorator ─────────────────────────────────────────────
 
 def login_required(view):
+    """Wraps a route so unauthenticated users are redirected to login."""
     @wraps(view)
     def wrapped(*args, **kwargs):
         if "user_id" not in session:
@@ -39,11 +41,13 @@ def login_required(view):
 # ── Database ───────────────────────────────────────────────────
 
 def get_db():
+    """Open a SQLite connection with dict-like row access."""
     conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row  # Allows row["column"] instead of row[0]
     return conn
 
 def init_db():
+    """Create tables on first run if they don't exist yet."""
     with get_db() as db:
         db.execute("""
             CREATE TABLE IF NOT EXISTS users (
@@ -66,9 +70,10 @@ def init_db():
 
 init_db()
 
-# ── Gemini helpers ─────────────────────────────────────────────
+# ── Gemini AI Helpers ──────────────────────────────────────────
 
 def call_gemini(prompt):
+    """Send a prompt to Gemini and return the text response."""
     try:
         response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
         return response.text
@@ -77,6 +82,8 @@ def call_gemini(prompt):
 
 
 def gemini_career_chat(history):
+    """Build a career guidance prompt from the conversation history and call Gemini."""
+    # Format the chat history into a readable transcript for the AI
     convo = "\n".join([f"{m['role'].upper()}: {m['text']}" for m in history])
     prompt = f"""
 You are an AI career guidance assistant for people from ANY background.
@@ -101,7 +108,8 @@ Conversation:
 
 
 def gemini_improve_cv_text(text, field_type):
-    """Improve a piece of CV text — summary, description, experience, etc."""
+    """Ask Gemini to rewrite a CV field in a more professional tone."""
+    # Map field type to a human-readable description used in the prompt
     context = {
         'summary':    'a professional summary for a CV',
         'experience': 'a work experience description for a CV',
@@ -127,6 +135,7 @@ Instructions:
 
 
 def gemini_generate_quiz(topic):
+    """Generate 10 multiple-choice questions for a given job role and return them as a list."""
     prompt = f"""
 Generate 10 multiple-choice interview questions for someone applying for: {topic}
 
@@ -145,17 +154,21 @@ Return ONLY a valid JSON object in this exact format, no extra text:
     try:
         response = client.models.generate_content(model=MODEL_NAME, contents=prompt)
         text = response.text.strip()
+
+        # Strip markdown code fences if Gemini wraps the JSON in ```json ... ```
         if text.startswith("```"):
             text = text.split("```")[1]
             if text.startswith("json"):
                 text = text[4:]
+
         data = json.loads(text.strip())
         return data["questions"]
     except Exception:
-        return None
+        return None  # Caller handles the None case
 
 
 def gemini_cover_letter(name, jobtitle, company, jd, skills):
+    """Generate a tailored cover letter based on the applicant's details."""
     prompt = f"""
 Write a professional, compelling cover letter for the following:
 
@@ -177,7 +190,7 @@ Instructions:
 """
     return call_gemini(prompt)
 
-# ── Public routes ──────────────────────────────────────────────
+# ── Public Routes (no login needed) ───────────────────────────
 
 @app.route("/")
 def landing():
@@ -189,9 +202,12 @@ def signup():
     if request.method == "POST":
         email    = request.form["email"]
         password = request.form["password"]
+
         if len(password) < 6:
             flash("Password must be at least 6 characters.", "error")
             return redirect(url_for("signup"))
+
+        # Hash the password before storing — never store plain text passwords
         hashed = generate_password_hash(password, method="pbkdf2:sha256")
         try:
             with get_db() as db:
@@ -199,8 +215,10 @@ def signup():
             flash("Account created. Please log in.", "success")
             return redirect(url_for("login"))
         except sqlite3.IntegrityError:
+            # Triggered when the email already exists (UNIQUE constraint)
             flash("Email already registered.", "error")
             return redirect(url_for("signup"))
+
     return render_template("signup.html")
 
 
@@ -209,16 +227,22 @@ def login():
     if request.method == "POST":
         email    = request.form["email"]
         password = request.form["password"]
+
         with get_db() as db:
             user = db.execute("SELECT * FROM users WHERE email = ?", (email,)).fetchone()
+
+        # Fail if user not found or password doesn't match the stored hash
         if not user or not check_password_hash(user["password"], password):
             flash("Invalid email or password.", "error")
             return redirect(url_for("login"))
+
+        # Store user info in the session so other routes can identify them
         session.clear()
         session["user_id"]    = user["id"]
         session["user_email"] = user["email"]
-        session["history"]    = []
+        session["history"]    = []  # Fresh chat history on each login
         return redirect(url_for("dashboard"))
+
     return render_template("login.html")
 
 
@@ -227,11 +251,12 @@ def logout():
     session.clear()
     return redirect(url_for("landing"))
 
-# ── Protected routes ───────────────────────────────────────────
+# ── Protected Routes (login required) ─────────────────────────
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
+    # Fetch the user's 10 most recent quiz results to display in the history table
     with get_db() as db:
         results = db.execute(
             "SELECT * FROM quiz_results WHERE user_id = ? ORDER BY created_at DESC LIMIT 10",
@@ -254,25 +279,28 @@ def chat_send():
         return jsonify({"reply": "Please type a message."})
     if len(message) > 2000:
         return jsonify({"reply": "Message too long — please keep it under 2000 characters."})
+
+    # Keep only the last 10 messages so the session doesn't grow too large
     history = session.get("history", [])
     history.append({"role": "user", "text": message})
     history = history[-10:]
     session["history"] = history
+
     reply = gemini_career_chat(history)
+
     history.append({"role": "assistant", "text": reply})
     history = history[-10:]
     session["history"] = history
+
     return jsonify({"reply": reply})
 
 
-# CV Builder page
 @app.route("/cv")
 @login_required
 def cv():
     return render_template("cv.html")
 
 
-# CV Builder — AI improve a text field
 @app.route("/cv/improve", methods=["POST"])
 @login_required
 def cv_improve():
@@ -282,8 +310,6 @@ def cv_improve():
         return jsonify({"improved": "Please write some content first."})
     improved = gemini_improve_cv_text(text, field_type)
     return jsonify({"improved": improved})
-
-
 
 
 @app.route("/interview")
@@ -307,6 +333,7 @@ def interview_generate():
 @app.route("/interview/save", methods=["POST"])
 @login_required
 def interview_save():
+    """Save the user's quiz score to the database after completing a quiz."""
     topic = request.form.get("topic", "General").strip()
     score = request.form.get("score", 0)
     total = request.form.get("total", 10)
@@ -335,15 +362,14 @@ def cover_letter_generate():
     company  = request.form.get("company", "").strip()
     jd       = request.form.get("jd", "").strip()
     skills   = request.form.get("skills", "").strip()
+
     if not jobtitle or not company or not jd:
         return jsonify({"letter": "Please fill in the job title, company, and job description."})
-    return jsonify({"letter": gemini_cover_letter(name, jobtitle, company, jd, skills)})
 
+    return jsonify({"letter": gemini_cover_letter(name, jobtitle, company, jd, skills)})
 
 # ── Run ────────────────────────────────────────────────────────
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
 
