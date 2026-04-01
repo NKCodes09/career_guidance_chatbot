@@ -2,6 +2,7 @@
 {% block content %}
 
 <section class="page">
+  <!-- Decorative background -->
   <div class="page-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -19,18 +20,18 @@
         <a href="/dashboard" class="btn ghost">← Dashboard</a>
       </div>
 
-      <!-- Setup screen -->
+      <!-- SCREEN 1: User enters a job role to generate questions -->
       <div id="screen-setup" class="quiz-screen">
         <div class="setup-box">
           <h3>Choose your focus</h3>
           <p>Enter a job role or industry and we'll generate 10 tailored multiple-choice questions.</p>
           <input id="quiz-topic" class="tool-input" type="text"
-            placeholder="e.g. Software Engineer, Marketing Manager, Nurse, Data Analyst…">
+            placeholder="e.g. Software Engineer, Marketing Manager, Nurse…">
           <button class="btn primary block" onclick="startQuiz()">Generate Questions</button>
         </div>
       </div>
 
-      <!-- Loading screen -->
+      <!-- SCREEN 2: Shown while AI is generating questions -->
       <div id="screen-loading" class="quiz-screen" style="display:none;">
         <div class="loading-box">
           <div class="typing-dots big"><span></span><span></span><span></span></div>
@@ -38,26 +39,31 @@
         </div>
       </div>
 
-      <!-- Quiz screen -->
+      <!-- SCREEN 3: The active quiz -->
       <div id="screen-quiz" class="quiz-screen" style="display:none;">
+        <!-- Progress bar showing how far through the quiz the user is -->
         <div class="quiz-progress-wrap">
-          <div class="quiz-progress-bar"><div id="progress-fill" class="quiz-progress-fill"></div></div>
+          <div class="quiz-progress-bar">
+            <div id="progress-fill" class="quiz-progress-fill"></div>
+          </div>
           <span id="progress-label" class="quiz-progress-label">Question 1 of 10</span>
         </div>
+
         <div id="question-box" class="question-box">
           <p id="question-text" class="question-text"></p>
           <div id="options-list" class="options-list"></div>
           <div id="explanation-box" class="explanation-box" style="display:none;"></div>
           <div class="quiz-nav">
-            <button id="btn-explain" class="btn ghost" onclick="showExplanation()" style="display:none;">Show Explanation</button>
-            <button id="btn-next"    class="btn primary" onclick="nextQuestion()" style="display:none;">Next →</button>
+            <button id="btn-explain" class="btn ghost"   onclick="showExplanation()" style="display:none;">Show Explanation</button>
+            <button id="btn-next"    class="btn primary" onclick="nextQuestion()"    style="display:none;">Next →</button>
           </div>
         </div>
       </div>
 
-      <!-- Results screen -->
+      <!-- SCREEN 4: Final results after all questions are answered -->
       <div id="screen-results" class="quiz-screen" style="display:none;">
         <div class="results-box">
+          <!-- Colour-coded score circle (green/yellow/red based on %) -->
           <div class="results-score-circle" id="results-circle">
             <span id="results-pct"></span>
           </div>
@@ -76,43 +82,59 @@
 </section>
 
 <script>
+// Global quiz state
 let questions = [], current = 0, score = 0, userAnswers = [], quizTopic = '';
 
+// Helper: hides all screens then shows only the requested one
 function show(id) {
-  ['screen-setup','screen-loading','screen-quiz','screen-results'].forEach(s => {
-    document.getElementById(s).style.display = s === id ? 'block' : 'none';
+  ['screen-setup', 'screen-loading', 'screen-quiz', 'screen-results'].forEach(screenId => {
+    document.getElementById(screenId).style.display = (screenId === id) ? 'block' : 'none';
   });
 }
 
+// Called when user clicks "Generate Questions"
 async function startQuiz() {
   quizTopic = document.getElementById('quiz-topic').value.trim();
   if (!quizTopic) { alert('Please enter a job role or industry first.'); return; }
+
   show('screen-loading');
+
+  // Send topic to backend; receive AI-generated questions
   const res  = await fetch('/interview/generate', {
-    method: 'POST', body: new URLSearchParams({ topic: quizTopic })
+    method: 'POST',
+    body: new URLSearchParams({ topic: quizTopic })
   });
   const data = await res.json();
+
   if (data.error) { alert('Something went wrong. Please try again.'); show('screen-setup'); return; }
+
+  // Reset state and begin quiz
   questions   = data.questions;
   current     = 0; score = 0; userAnswers = [];
   renderQuestion();
   show('screen-quiz');
 }
 
+// Renders the current question and its answer options
 function renderQuestion() {
   const q     = questions[current];
   const total = questions.length;
+
+  // Update progress bar and label
   document.getElementById('progress-fill').style.width  = ((current / total) * 100) + '%';
   document.getElementById('progress-label').textContent = `Question ${current + 1} of ${total}`;
   document.getElementById('question-text').textContent  = q.question;
-  document.getElementById('explanation-box').style.display = 'none';
-  document.getElementById('btn-explain').style.display  = 'none';
-  document.getElementById('btn-next').style.display     = 'none';
 
+  // Hide explanation and nav buttons until user selects an answer
+  document.getElementById('explanation-box').style.display = 'none';
+  document.getElementById('btn-explain').style.display     = 'none';
+  document.getElementById('btn-next').style.display        = 'none';
+
+  // Build answer option buttons dynamically
   const list = document.getElementById('options-list');
   list.innerHTML = '';
   q.options.forEach(opt => {
-    const btn = document.createElement('button');
+    const btn       = document.createElement('button');
     btn.className   = 'option-btn';
     btn.textContent = opt;
     btn.onclick     = () => selectAnswer(opt, btn);
@@ -120,41 +142,55 @@ function renderQuestion() {
   });
 }
 
+// Handles answer selection: locks options, highlights correct/wrong
 function selectAnswer(answer, btn) {
+  // Lock all options so user can't change their answer
   document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-  const q = questions[current];
+
+  const q       = questions[current];
   userAnswers[current] = answer;
-  const correct = answer === q.correctAnswer;
-  if (correct) { score++; btn.classList.add('correct'); }
-  else {
+  const correct = (answer === q.correctAnswer);
+
+  if (correct) {
+    score++;
+    btn.classList.add('correct');
+  } else {
     btn.classList.add('wrong');
+    // Highlight the correct answer in green
     document.querySelectorAll('.option-btn').forEach(b => {
       if (b.textContent === q.correctAnswer) b.classList.add('correct');
     });
   }
+
+  // Show explanation and next button after answering
   document.getElementById('btn-explain').style.display = 'inline-flex';
   document.getElementById('btn-next').style.display    = 'inline-flex';
   document.getElementById('btn-next').textContent      = current < questions.length - 1 ? 'Next →' : 'See Results';
 }
 
+// Reveals the AI-generated explanation for the current question
 function showExplanation() {
-  const q   = questions[current];
-  const box = document.getElementById('explanation-box');
-  box.innerHTML = `<strong>Explanation:</strong> ${q.explanation}`;
+  const box     = document.getElementById('explanation-box');
+  box.innerHTML = `<strong>Explanation:</strong> ${questions[current].explanation}`;
   box.style.display = 'block';
   document.getElementById('btn-explain').style.display = 'none';
 }
 
+// Moves to the next question, or shows results if quiz is complete
 function nextQuestion() {
   current++;
-  if (current < questions.length) { renderQuestion(); }
-  else { showResults(); }
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    showResults();
+  }
 }
 
+// Saves score to DB and renders the results screen
 async function showResults() {
   show('screen-results');
 
-  // Save score to database
+  // Persist result to database via backend route
   await fetch('/interview/save', {
     method: 'POST',
     body: new URLSearchParams({ topic: quizTopic, score: score, total: questions.length })
@@ -162,15 +198,14 @@ async function showResults() {
 
   const pct    = Math.round((score / questions.length) * 100);
   const circle = document.getElementById('results-circle');
-  document.getElementById('results-pct').textContent = pct + '%';
-  circle.className = 'results-score-circle ' + (pct >= 70 ? 'good' : pct >= 40 ? 'ok' : 'low');
-  document.getElementById('results-title').textContent =
-    pct >= 70 ? '🎉 Great job!' : pct >= 40 ? '👍 Good effort!' : '📚 Keep practising!';
-  document.getElementById('results-msg').textContent =
-    `You got ${score} out of ${questions.length} correct. Score saved to your dashboard.`;
 
-  const bd = document.getElementById('results-breakdown');
-  bd.innerHTML = questions.map((q, i) => `
+  document.getElementById('results-pct').textContent   = pct + '%';
+  circle.className = 'results-score-circle ' + (pct >= 70 ? 'good' : pct >= 40 ? 'ok' : 'low');
+  document.getElementById('results-title').textContent = pct >= 70 ? '🎉 Great job!' : pct >= 40 ? '👍 Good effort!' : '📚 Keep practising!';
+  document.getElementById('results-msg').textContent   = `You got ${score} out of ${questions.length} correct. Score saved to your dashboard.`;
+
+  // Build per-question breakdown showing correct/incorrect for each
+  document.getElementById('results-breakdown').innerHTML = questions.map((q, i) => `
     <div class="result-item ${userAnswers[i] === q.correctAnswer ? 'r-correct' : 'r-wrong'}">
       <div class="r-icon">${userAnswers[i] === q.correctAnswer ? '✓' : '✗'}</div>
       <div>
@@ -183,8 +218,10 @@ async function showResults() {
   `).join('');
 }
 
+// Resets back to the setup screen so user can try a new topic
 function restartQuiz() {
   show('screen-setup');
 }
 </script>
+
 {% endblock %}

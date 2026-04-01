@@ -2,6 +2,7 @@
 {% block content %}
 
 <section class="page">
+  <!-- Decorative background blobs and grid (styled in CSS) -->
   <div class="page-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -46,18 +47,22 @@
           <div class="field-group">
             <label class="field-label">Your Key Skills / Experience (brief summary)</label>
             <textarea id="cl-skills" class="cv-textarea" style="min-height:100px;"
-              placeholder="e.g. 3 years Python experience, BSc Computer Science, led a team of 5, strong communication skills…"></textarea>
+              placeholder="e.g. 3 years Python experience, BSc Computer Science, led a team of 5…"></textarea>
           </div>
 
-          <button class="btn primary block" id="cl-btn" onclick="generateCoverLetter()">Generate Cover Letter</button>
+          <button class="btn primary block" id="cl-btn" onclick="generateCoverLetter()">
+            Generate Cover Letter
+          </button>
         </div>
 
-        <div id="cl-loading" style="display:none;text-align:center;padding:30px 0;color:rgba(255,255,255,0.6);">
+        <!-- Loading indicator — shown while the AI is generating the letter -->
+        <div id="cl-loading" style="display:none; text-align:center; padding:30px 0; color:rgba(255,255,255,0.6);">
           <div class="typing-dots big"><span></span><span></span><span></span></div>
-          <p style="margin-top:12px;font-size:14px;">Writing your cover letter…</p>
+          <p style="margin-top:12px; font-size:14px;">Writing your cover letter…</p>
         </div>
 
-        <div id="cl-result" style="display:none;" class="cl-result">
+        <!-- Result box — hidden until the letter is ready -->
+        <div id="cl-result" class="cl-result" style="display:none;">
           <div class="cl-result-header">
             <span>✉️ Your Cover Letter</span>
             <button class="btn ghost small" onclick="copyLetter()">Copy Text</button>
@@ -71,42 +76,48 @@
 </section>
 
 <script>
-async function generateCoverLetter() {
-  const name     = document.getElementById('cl-name').value.trim();
-  const jobtitle = document.getElementById('cl-jobtitle').value.trim();
-  const company  = document.getElementById('cl-company').value.trim();
-  const jd       = document.getElementById('cl-jd').value.trim();
-  const skills   = document.getElementById('cl-skills').value.trim();
+  async function generateCoverLetter() {
+    // Read all input values
+    const name     = document.getElementById('cl-name').value.trim();
+    const jobtitle = document.getElementById('cl-jobtitle').value.trim();
+    const company  = document.getElementById('cl-company').value.trim();
+    const jd       = document.getElementById('cl-jd').value.trim();
+    const skills   = document.getElementById('cl-skills').value.trim();
 
-  if (!jobtitle || !company || !jd) {
-    alert('Please fill in the Job Title, Company Name, and Job Description at minimum.');
-    return;
+    // Job title, company, and job description are the minimum required fields
+    if (!jobtitle || !company || !jd) {
+      alert('Please fill in the Job Title, Company Name, and Job Description at minimum.');
+      return;
+    }
+
+    // Show loading state while waiting for the AI
+    document.getElementById('cl-result').style.display  = 'none';
+    document.getElementById('cl-loading').style.display = 'block';
+    document.getElementById('cl-btn').disabled = true;
+
+    // Send form data to Flask and get the generated letter back
+    const res  = await fetch('/cover-letter/generate', {
+      method: 'POST',
+      body: new URLSearchParams({ name, jobtitle, company, jd, skills })
+    });
+    const data = await res.json();
+
+    // Display the letter as plain text (cover letters don't use Markdown)
+    document.getElementById('cl-loading').style.display = 'none';
+    document.getElementById('cl-result').style.display  = 'block';
+    document.getElementById('cl-result-body').innerText = data.letter;
+    document.getElementById('cl-btn').disabled = false;
   }
 
-  document.getElementById('cl-result').style.display  = 'none';
-  document.getElementById('cl-loading').style.display = 'block';
-  document.getElementById('cl-btn').disabled = true;
-
-  const res  = await fetch('/cover-letter/generate', {
-    method: 'POST',
-    body: new URLSearchParams({ name, jobtitle, company, jd, skills })
-  });
-  const data = await res.json();
-
-  document.getElementById('cl-loading').style.display = 'none';
-  document.getElementById('cl-result').style.display  = 'block';
-  document.getElementById('cl-result-body').innerText = data.letter;
-  document.getElementById('cl-btn').disabled = false;
-}
-
-function copyLetter() {
-  const text = document.getElementById('cl-result-body').innerText;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = event.target;
-    btn.textContent = 'Copied!';
-    setTimeout(() => btn.textContent = 'Copy Text', 2000);
-  });
-}
+  // Copy the letter text to the clipboard and briefly confirm with button text
+  function copyLetter() {
+    const text = document.getElementById('cl-result-body').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy Text', 2000); // Reset after 2s
+    });
+  }
 </script>
 
 {% endblock %}

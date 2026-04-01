@@ -2,6 +2,7 @@
 {% block content %}
 
 <section class="page" style="align-items:flex-start; padding-top:32px;">
+  <!-- Decorative background blobs and grid (styled in CSS) -->
   <div class="page-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -10,23 +11,23 @@
 
   <div class="cvb-shell">
 
-    <!-- Header -->
     <div class="cvb-header">
       <div>
         <h1 class="cvb-title">📄 CV Builder</h1>
         <p class="cvb-sub">Fill in your details — then preview and download your CV as a PDF.</p>
       </div>
+      <!-- Mobile view toggle buttons (on desktop both columns are always visible) -->
       <div class="cvb-header-actions">
-        <button class="btn ghost" onclick="switchView('form')" id="btn-form">✏️ Edit Form</button>
+        <button class="btn ghost" onclick="switchView('form')"    id="btn-form">✏️ Edit Form</button>
         <button class="btn ghost" onclick="switchView('preview')" id="btn-preview">👁 Preview</button>
-        <button class="btn primary" onclick="downloadPDF()" id="btn-pdf">⬇ Download PDF</button>
+        <button class="btn primary" onclick="downloadPDF()"       id="btn-pdf">⬇ Download PDF</button>
         <a href="/dashboard" class="btn ghost">← Dashboard</a>
       </div>
     </div>
 
     <div class="cvb-body">
 
-      <!-- ══ LEFT: Form ══════════════════════════════════════ -->
+      <!-- ══ LEFT: Input Form ════════════════════════════════ -->
       <div class="cvb-form-col" id="col-form">
 
         <!-- Personal Info -->
@@ -35,27 +36,27 @@
           <div class="cvb-grid-2">
             <div class="cvb-field">
               <label>Full Name</label>
-              <input class="tool-input" id="f-name" type="text" placeholder="e.g. John Smith" oninput="updatePreview()">
+              <input class="tool-input" id="f-name"     type="text"  placeholder="e.g. John Smith"          oninput="updatePreview()">
             </div>
             <div class="cvb-field">
               <label>Job Title / Role</label>
-              <input class="tool-input" id="f-role" type="text" placeholder="e.g. Software Developer" oninput="updatePreview()">
+              <input class="tool-input" id="f-role"     type="text"  placeholder="e.g. Software Developer"  oninput="updatePreview()">
             </div>
             <div class="cvb-field">
               <label>Email</label>
-              <input class="tool-input" id="f-email" type="email" placeholder="your@email.com" oninput="updatePreview()">
+              <input class="tool-input" id="f-email"    type="email" placeholder="your@email.com"           oninput="updatePreview()">
             </div>
             <div class="cvb-field">
               <label>Phone</label>
-              <input class="tool-input" id="f-phone" type="tel" placeholder="+44 7700 000000" oninput="updatePreview()">
+              <input class="tool-input" id="f-phone"    type="tel"   placeholder="+44 7700 000000"          oninput="updatePreview()">
             </div>
             <div class="cvb-field">
               <label>Location</label>
-              <input class="tool-input" id="f-location" type="text" placeholder="e.g. London, UK" oninput="updatePreview()">
+              <input class="tool-input" id="f-location" type="text"  placeholder="e.g. London, UK"          oninput="updatePreview()">
             </div>
             <div class="cvb-field">
               <label>LinkedIn URL</label>
-              <input class="tool-input" id="f-linkedin" type="url" placeholder="https://linkedin.com/in/yourname" oninput="updatePreview()">
+              <input class="tool-input" id="f-linkedin" type="url"   placeholder="https://linkedin.com/in/yourname" oninput="updatePreview()">
             </div>
           </div>
         </div>
@@ -65,7 +66,7 @@
           <div class="cvb-section-title">📝 Professional Summary</div>
           <div class="cvb-field">
             <textarea class="cv-textarea" id="f-summary" rows="4"
-              placeholder="Write a 2–3 sentence summary of your professional background and goals…"
+              placeholder="Write a 2–3 sentence summary of your background and goals…"
               oninput="updatePreview()"></textarea>
           </div>
           <button class="btn ghost small cvb-ai-btn" onclick="improveWithAI('summary')">✨ Improve with AI</button>
@@ -76,7 +77,7 @@
           <div class="cvb-section-title">🛠 Skills</div>
           <div class="cvb-field">
             <textarea class="cv-textarea" id="f-skills" rows="3"
-              placeholder="e.g. Python, JavaScript, Flask, teamwork, project management, communication…"
+              placeholder="e.g. Python, JavaScript, Flask, teamwork, project management…"
               oninput="updatePreview()"></textarea>
           </div>
         </div>
@@ -104,12 +105,14 @@
 
       </div>
 
-      <!-- ══ RIGHT: Preview ══════════════════════════════════ -->
+      <!-- ══ RIGHT: Live Preview ═════════════════════════════ -->
       <div class="cvb-preview-col" id="col-preview">
         <div class="cvb-preview-label">Live Preview</div>
-        <div class="cvb-preview-paper" id="cv-preview-paper">
+        <div class="cvb-preview-paper">
           <div id="cv-preview-content">
-            <p style="color:#999;text-align:center;padding:40px 0;font-size:14px;">Start filling in the form to see your CV preview here.</p>
+            <p style="color:#999; text-align:center; padding:40px 0; font-size:14px;">
+              Start filling in the form to see your CV preview here.
+            </p>
           </div>
         </div>
       </div>
@@ -118,7 +121,10 @@
   </div>
 </section>
 
-<!-- ══ Entry Form Modal ══════════════════════════════════════ -->
+<!-- ══ Add Entry Modal (popup dialog) ══════════════════════════
+     Shared by Experience, Education, and Projects sections.
+     Labels and placeholders change depending on which section opened it.
+══════════════════════════════════════════════════════════════ -->
 <div id="entry-modal" class="modal-overlay" style="display:none;" onclick="closeModalOnBg(event)">
   <div class="modal-box">
     <div class="modal-header">
@@ -152,35 +158,40 @@
         <textarea class="cv-textarea" id="e-desc" rows="4"
           placeholder="Describe your responsibilities, achievements, or what you built…"></textarea>
       </div>
-      <button class="btn ghost small cvb-ai-btn" onclick="improveEntryWithAI()" id="improve-entry-btn">✨ Improve with AI</button>
+      <button class="btn ghost small cvb-ai-btn" onclick="improveEntryWithAI()">✨ Improve with AI</button>
     </div>
     <div class="modal-footer">
-      <button class="btn ghost" onclick="closeEntryForm()">Cancel</button>
-      <button class="btn primary" onclick="saveEntry()">Add Entry</button>
+      <button class="btn ghost"    onclick="closeEntryForm()">Cancel</button>
+      <button class="btn primary"  onclick="saveEntry()">Add Entry</button>
     </div>
   </div>
 </div>
 
-<!-- AI loading overlay -->
-<div id="ai-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px;">
+<!-- Full-screen overlay shown during AI generation or PDF rendering -->
+<div id="ai-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:9999; align-items:center; justify-content:center; flex-direction:column; gap:14px;">
   <div class="typing-dots big"><span></span><span></span><span></span></div>
-  <p style="color:#fff;font-size:15px;" id="ai-overlay-msg">Improving with AI…</p>
+  <p style="color:#fff; font-size:15px;" id="ai-overlay-msg">Improving with AI…</p>
 </div>
 
-<!-- PDF hidden render target -->
+<!-- Hidden div used as the render target when generating the PDF -->
 <div id="pdf-render" style="display:none;"></div>
 
+<!-- html2pdf.js — renders the CV HTML to a downloadable PDF in the browser -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-// ── State ───────────────────────────────────────────────────
+
+// ── State ──────────────────────────────────────────────────────
+// Arrays store entries added via the modal — not saved to a database,
+// just held in memory while the user is on the page.
 const state = {
   experience: [],
   education:  [],
   projects:   []
 };
-let currentEntryType = '';
+let currentEntryType = ''; // Tracks which section the modal was opened for
 
-// ── View switching (mobile) ─────────────────────────────────
+// ── Mobile View Switching ──────────────────────────────────────
+// On small screens only one column is shown at a time
 function switchView(v) {
   document.getElementById('col-form').style.display    = v === 'form'    ? '' : 'none';
   document.getElementById('col-preview').style.display = v === 'preview' ? '' : 'none';
@@ -188,10 +199,61 @@ function switchView(v) {
   document.getElementById('btn-preview').classList.toggle('active', v === 'preview');
 }
 
-// ── Live preview ────────────────────────────────────────────
-function val(id) { return (document.getElementById(id)?.value || '').trim(); }
+// ── Helpers ────────────────────────────────────────────────────
 
+// Safely read a form field value (returns '' if the element doesn't exist)
+function val(id) {
+  return (document.getElementById(id)?.value || '').trim();
+}
+
+// Escape HTML special characters to prevent XSS when injecting user input into innerHTML
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// Wrap a section title + body into the standard CV section HTML
+function section(title, body) {
+  return `<div class="pdf-section">
+    <div class="pdf-section-title">${title}</div>
+    <div class="pdf-section-body">${body}</div>
+  </div>`;
+}
+
+// Build the HTML for a single experience/education/project entry
+function entryHTML(e) {
+  const dates = e.current
+    ? `${e.start} – Present`
+    : `${e.start}${e.end ? ' – ' + e.end : ''}`;
+
+  return `<div class="pdf-entry">
+    <div class="pdf-entry-head">
+      <div>
+        <span class="pdf-entry-title">${esc(e.title)}</span>
+        ${e.org ? `<span class="pdf-entry-org"> @ ${esc(e.org)}</span>` : ''}
+      </div>
+      <span class="pdf-entry-dates">${dates}</span>
+    </div>
+    ${e.desc ? `<div class="pdf-entry-desc">${esc(e.desc).replace(/\n/g, '<br>')}</div>` : ''}
+  </div>`;
+}
+
+// Format a "YYYY-MM" date input value into "Jan 2024" style
+function fmtMonth(value) {
+  if (!value) return '';
+  const [year, month] = value.split('-');
+  const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${names[parseInt(month) - 1]} ${year}`;
+}
+
+// ── Live Preview ───────────────────────────────────────────────
+// Called on every keystroke (oninput) to keep the preview in sync with the form
 function updatePreview() {
+  let html = '';
+
   const name     = val('f-name');
   const role     = val('f-role');
   const email    = val('f-email');
@@ -201,99 +263,67 @@ function updatePreview() {
   const summary  = val('f-summary');
   const skills   = val('f-skills');
 
-  let html = '';
-
-  // Header
+  // Header — only rendered if the user has typed their name
   if (name) {
     html += `<div class="pdf-header">
       <h1>${esc(name)}</h1>
       ${role ? `<div class="pdf-role">${esc(role)}</div>` : ''}
       <div class="pdf-contact">
-        ${email    ? `<span>✉ ${esc(email)}</span>` : ''}
-        ${phone    ? `<span>📱 ${esc(phone)}</span>` : ''}
-        ${location ? `<span>📍 ${esc(location)}</span>` : ''}
+        ${email    ? `<span>✉ ${esc(email)}</span>`    : ''}
+        ${phone    ? `<span>📱 ${esc(phone)}</span>`   : ''}
+        ${location ? `<span>📍 ${esc(location)}</span>`: ''}
         ${linkedin ? `<span>🔗 <a href="${esc(linkedin)}" target="_blank">LinkedIn</a></span>` : ''}
       </div>
     </div>`;
   }
 
-  // Summary
   if (summary) {
-    html += section('Professional Summary', `<p>${esc(summary).replace(/\n/g,'<br>')}</p>`);
+    html += section('Professional Summary', `<p>${esc(summary).replace(/\n/g, '<br>')}</p>`);
   }
 
-  // Skills
+  // Skills — split by comma or newline into individual pill badges
   if (skills) {
     const chips = skills.split(/[,\n]+/).map(s => s.trim()).filter(Boolean);
-    html += section('Skills', `<div class="pdf-skills">${chips.map(s=>`<span class="pdf-skill">${esc(s)}</span>`).join('')}</div>`);
+    html += section('Skills',
+      `<div class="pdf-skills">${chips.map(s => `<span class="pdf-skill">${esc(s)}</span>`).join('')}</div>`
+    );
   }
 
-  // Experience
-  if (state.experience.length) {
-    html += section('Work Experience', state.experience.map(entryHTML).join(''));
-  }
+  if (state.experience.length) html += section('Work Experience', state.experience.map(entryHTML).join(''));
+  if (state.education.length)  html += section('Education',       state.education.map(entryHTML).join(''));
+  if (state.projects.length)   html += section('Projects',        state.projects.map(entryHTML).join(''));
 
-  // Education
-  if (state.education.length) {
-    html += section('Education', state.education.map(entryHTML).join(''));
-  }
-
-  // Projects
-  if (state.projects.length) {
-    html += section('Projects', state.projects.map(entryHTML).join(''));
-  }
-
-  if (!html) {
-    html = '<p style="color:#999;text-align:center;padding:40px 0;font-size:14px;">Start filling in the form to see your CV preview here.</p>';
-  }
-
-  document.getElementById('cv-preview-content').innerHTML = html;
+  // Fallback placeholder when the form is empty
+  document.getElementById('cv-preview-content').innerHTML = html ||
+    '<p style="color:#999;text-align:center;padding:40px 0;font-size:14px;">Start filling in the form to see your CV preview here.</p>';
 }
 
-function section(title, body) {
-  return `<div class="pdf-section">
-    <div class="pdf-section-title">${title}</div>
-    <div class="pdf-section-body">${body}</div>
-  </div>`;
-}
+// ── Entry Modal ────────────────────────────────────────────────
 
-function entryHTML(e) {
-  const dates = e.current ? `${e.start} – Present` : `${e.start}${e.end ? ' – ' + e.end : ''}`;
-  return `<div class="pdf-entry">
-    <div class="pdf-entry-head">
-      <div>
-        <span class="pdf-entry-title">${esc(e.title)}</span>
-        ${e.org ? ` <span class="pdf-entry-org">@ ${esc(e.org)}</span>` : ''}
-      </div>
-      <span class="pdf-entry-dates">${dates}</span>
-    </div>
-    ${e.desc ? `<div class="pdf-entry-desc">${esc(e.desc).replace(/\n/g,'<br>')}</div>` : ''}
-  </div>`;
-}
-
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// ── Entry modal ─────────────────────────────────────────────
+// Open the modal and configure its labels for the correct section type
 function openEntryForm(type) {
   currentEntryType = type;
+
   const labels = {
-    experience: { title:'Job Title / Position', org:'Company / Organisation',   desc:'Describe your responsibilities and achievements' },
-    education:  { title:'Degree / Qualification',  org:'School / University',   desc:'Describe what you studied and any achievements' },
-    project:    { title:'Project Name',            org:'Organisation (optional)',desc:'Describe what you built and the technologies used' }
+    experience: { title: 'Job Title / Position',    org: 'Company / Organisation',    desc: 'Describe your responsibilities and achievements' },
+    education:  { title: 'Degree / Qualification',  org: 'School / University',        desc: 'Describe what you studied and any achievements' },
+    project:    { title: 'Project Name',             org: 'Organisation (optional)',    desc: 'Describe what you built and the technologies used' }
   };
   const l = labels[type];
-  document.getElementById('modal-title').textContent       = `Add ${type.charAt(0).toUpperCase()+type.slice(1)}`;
-  document.getElementById('label-title').textContent       = l.title;
-  document.getElementById('label-org').textContent         = l.org;
-  document.getElementById('label-desc').textContent        = 'Description';
-  document.getElementById('e-desc').placeholder            = l.desc;
-  ['e-title','e-org','e-desc'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('e-start').value  = '';
-  document.getElementById('e-end').value    = '';
-  document.getElementById('e-current').checked = false;
-  document.getElementById('e-end').disabled = false;
+
+  // Set modal title and field labels
+  document.getElementById('modal-title').textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+  document.getElementById('label-title').textContent = l.title;
+  document.getElementById('label-org').textContent   = l.org;
+  document.getElementById('e-desc').placeholder      = l.desc;
+
+  // Clear all fields from the previous use
+  ['e-title', 'e-org', 'e-desc'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('e-start').value         = '';
+  document.getElementById('e-end').value           = '';
+  document.getElementById('e-current').checked     = false;
+  document.getElementById('e-end').disabled        = false;
+
   document.getElementById('entry-modal').style.display = 'flex';
 }
 
@@ -301,37 +331,33 @@ function closeEntryForm() {
   document.getElementById('entry-modal').style.display = 'none';
 }
 
+// Close the modal if the user clicks the dark overlay behind it
 function closeModalOnBg(e) {
   if (e.target === document.getElementById('entry-modal')) closeEntryForm();
 }
 
+// Disable the end date field when "Currently here" is checked
 function toggleCurrent() {
-  const checked = document.getElementById('e-current').checked;
-  document.getElementById('e-end').disabled = checked;
-  if (checked) document.getElementById('e-end').value = '';
+  const isCurrent = document.getElementById('e-current').checked;
+  document.getElementById('e-end').disabled = isCurrent;
+  if (isCurrent) document.getElementById('e-end').value = '';
 }
 
-function fmtMonth(val) {
-  if (!val) return '';
-  const [y, m] = val.split('-');
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  return `${months[parseInt(m)-1]} ${y}`;
-}
-
+// Save the modal form data into the correct state array and refresh the preview
 function saveEntry() {
   const title = document.getElementById('e-title').value.trim();
-  const org   = document.getElementById('e-org').value.trim();
   if (!title) { alert('Please enter a title.'); return; }
 
   const entry = {
     title,
-    org,
+    org:     document.getElementById('e-org').value.trim(),
     start:   fmtMonth(document.getElementById('e-start').value),
     end:     fmtMonth(document.getElementById('e-end').value),
     current: document.getElementById('e-current').checked,
     desc:    document.getElementById('e-desc').value.trim()
   };
 
+  // "project" maps to the "projects" key in state
   const key = currentEntryType === 'project' ? 'projects' : currentEntryType;
   state[key].push(entry);
   renderEntryList(key);
@@ -339,14 +365,14 @@ function saveEntry() {
   updatePreview();
 }
 
+// Re-render the mini entry cards shown below each section in the form column
 function renderEntryList(key) {
-  const listId = { experience:'experience-list', education:'education-list', projects:'projects-list' }[key];
-  const el = document.getElementById(listId);
-  el.innerHTML = state[key].map((e, i) => `
+  const listId = { experience: 'experience-list', education: 'education-list', projects: 'projects-list' }[key];
+  document.getElementById(listId).innerHTML = state[key].map((e, i) => `
     <div class="entry-card">
       <div class="entry-card-info">
         <div class="entry-card-title">${esc(e.title)}${e.org ? ` <span class="entry-card-org">@ ${esc(e.org)}</span>` : ''}</div>
-        <div class="entry-card-dates">${e.current ? e.start+' – Present' : e.start + (e.end ? ' – '+e.end : '')}</div>
+        <div class="entry-card-dates">${e.current ? e.start + ' – Present' : e.start + (e.end ? ' – ' + e.end : '')}</div>
       </div>
       <button class="entry-delete" onclick="deleteEntry('${key}', ${i})" title="Remove">✕</button>
     </div>
@@ -354,16 +380,19 @@ function renderEntryList(key) {
 }
 
 function deleteEntry(key, idx) {
-  state[key].splice(idx, 1);
+  state[key].splice(idx, 1); // Remove one item at position idx
   renderEntryList(key);
   updatePreview();
 }
 
-// ── AI improve ──────────────────────────────────────────────
+// ── AI Improve ─────────────────────────────────────────────────
+
+// Improve a main form field (summary) using the /cv/improve Flask route
 async function improveWithAI(field) {
   const el   = document.getElementById('f-' + field);
   const text = el.value.trim();
   if (!text) { alert('Please write something first, then we can improve it.'); return; }
+
   showAIOverlay('Improving your ' + field + ' with AI…');
   try {
     const res  = await fetch('/cv/improve', {
@@ -371,15 +400,21 @@ async function improveWithAI(field) {
       body: new URLSearchParams({ text, type: field })
     });
     const data = await res.json();
-    el.value = data.improved;
+    el.value = data.improved; // Replace the original text with the AI-improved version
     updatePreview();
-  } catch { alert('Something went wrong. Please try again.'); }
-  finally { hideAIOverlay(); }
+  } catch {
+    alert('Something went wrong. Please try again.');
+  } finally {
+    hideAIOverlay(); // Always hide the overlay, even if there was an error
+  }
 }
 
+// Improve the description field inside the modal
 async function improveEntryWithAI() {
-  const desc = document.getElementById('e-desc').value.trim();
+  const el   = document.getElementById('e-desc');
+  const desc = el.value.trim();
   if (!desc) { alert('Please write a description first.'); return; }
+
   showAIOverlay('Improving description with AI…');
   try {
     const res  = await fetch('/cv/improve', {
@@ -387,9 +422,12 @@ async function improveEntryWithAI() {
       body: new URLSearchParams({ text: desc, type: currentEntryType })
     });
     const data = await res.json();
-    document.getElementById('e-desc').value = data.improved;
-  } catch { alert('Something went wrong. Please try again.'); }
-  finally { hideAIOverlay(); }
+    el.value = data.improved;
+  } catch {
+    alert('Something went wrong. Please try again.');
+  } finally {
+    hideAIOverlay();
+  }
 }
 
 function showAIOverlay(msg) {
@@ -400,24 +438,18 @@ function hideAIOverlay() {
   document.getElementById('ai-overlay').style.display = 'none';
 }
 
-// ── PDF download ────────────────────────────────────────────
+// ── PDF Download ───────────────────────────────────────────────
+// Uses html2pdf.js to convert the CV preview HTML into a downloadable PDF
 async function downloadPDF() {
   const name    = val('f-name') || 'CV';
   const content = document.getElementById('cv-preview-content').innerHTML;
 
-  // Inject into hidden render target with proper white styles
-  const render  = document.getElementById('pdf-render');
+  // Inject the preview HTML into the hidden render div with light/print-friendly styles.
+  // We can't use the dark-themed preview directly — PDFs need a white background.
+  const render = document.getElementById('pdf-render');
   render.style.display = 'block';
   render.innerHTML = `
-    <div style="
-      font-family: 'Inter', Arial, sans-serif;
-      background: #ffffff;
-      color: #111111;
-      padding: 32px 36px;
-      font-size: 13px;
-      line-height: 1.6;
-      max-width: 794px;
-    ">
+    <div style="font-family:'Inter',Arial,sans-serif; background:#ffffff; color:#111111; padding:32px 36px; font-size:13px; line-height:1.6; max-width:794px;">
       <style>
         .pdf-header { text-align:center; margin-bottom:20px; padding-bottom:16px; border-bottom:2px solid #e0e0e0; }
         .pdf-header h1 { font-size:24px; font-weight:800; margin:0 0 4px; color:#111; }
@@ -440,18 +472,20 @@ async function downloadPDF() {
       ${content}
     </div>`;
 
+  // html2pdf options — scale:2 gives higher resolution output
   const opt = {
-    margin:     [10, 10],
-    filename:   name.replace(/\s+/g, '_') + '_CV.pdf',
-    image:      { type: 'jpeg', quality: 0.98 },
-    html2canvas:{ scale: 2, useCORS: true },
-    jsPDF:      { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    margin:      [10, 10],
+    filename:    name.replace(/\s+/g, '_') + '_CV.pdf',
+    image:       { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true },
+    jsPDF:       { unit: 'mm', format: 'a4', orientation: 'portrait' }
   };
 
   showAIOverlay('Generating your PDF…');
   try {
     await html2pdf().set(opt).from(render).save();
   } finally {
+    // Always clean up the render div after PDF generation
     render.style.display = 'none';
     render.innerHTML     = '';
     hideAIOverlay();

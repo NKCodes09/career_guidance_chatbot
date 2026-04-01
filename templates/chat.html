@@ -2,6 +2,7 @@
 {% block content %}
 
 <section class="page">
+  <!-- Decorative background blobs and grid (styled in CSS) -->
   <div class="page-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -19,6 +20,7 @@
         <a href="/dashboard" class="btn ghost">← Dashboard</a>
       </div>
 
+      <!-- Message history — new bubbles are appended here by JS -->
       <div id="chat-box" class="chat-box">
         <div class="message bot">
           <strong>AI</strong>
@@ -40,49 +42,75 @@
   </div>
 </section>
 
+<!-- marked.js — converts Markdown text from the AI into HTML -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
 <script>
-marked.setOptions({ breaks: true, gfm: true });
+  // Enable line breaks and GitHub-flavoured Markdown
+  marked.setOptions({ breaks: true, gfm: true });
 
-const form  = document.getElementById('chat-form');
-const box   = document.getElementById('chat-box');
-const input = document.getElementById('message');
+  const form  = document.getElementById('chat-form');
+  const box   = document.getElementById('chat-box');
+  const input = document.getElementById('message');
 
-function addMsg(role, text) {
-  const wrap   = document.createElement('div');
-  wrap.className = `message ${role}`;
-  const lbl    = document.createElement('strong');
-  lbl.textContent = role === 'user' ? 'You' : 'AI';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble md-content';
-  if (role === 'user') { bubble.textContent = text; }
-  else                 { bubble.innerHTML   = marked.parse(text); }
-  wrap.appendChild(lbl);
-  wrap.appendChild(bubble);
-  box.appendChild(wrap);
-  box.scrollTop = box.scrollHeight;
-}
+  // Creates and appends a chat bubble (user or AI) to the message list
+  function addMsg(role, text) {
+    const wrap   = document.createElement('div');
+    wrap.className = `message ${role}`;
 
-function showTyping() {
-  const t = document.createElement('div');
-  t.id = 'typing'; t.className = 'message bot';
-  t.innerHTML = `<strong>AI</strong><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
-  box.appendChild(t); box.scrollTop = box.scrollHeight;
-}
+    const label  = document.createElement('strong');
+    label.textContent = role === 'user' ? 'You' : 'AI';
 
-form.addEventListener('submit', async e => {
-  e.preventDefault();
-  const text = input.value.trim(); if (!text) return;
-  addMsg('user', text); input.value = ''; showTyping();
-  try {
-    const res  = await fetch('/chat/send', { method:'POST', body: new URLSearchParams({ message: text }) });
-    const data = await res.json();
-    document.getElementById('typing')?.remove();
-    addMsg('bot', data.reply);
-  } catch {
-    document.getElementById('typing')?.remove();
-    addMsg('bot', '⚠️ Something went wrong. Please try again.');
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble md-content';
+
+    // User messages are plain text; AI messages are rendered as Markdown
+    if (role === 'user') bubble.textContent = text;
+    else                 bubble.innerHTML   = marked.parse(text);
+
+    wrap.appendChild(label);
+    wrap.appendChild(bubble);
+    box.appendChild(wrap);
+    box.scrollTop = box.scrollHeight; // Auto-scroll to the latest message
   }
-});
+
+  // Shows animated typing dots while waiting for the AI response
+  function showTyping() {
+    const typing = document.createElement('div');
+    typing.id        = 'typing';
+    typing.className = 'message bot';
+    typing.innerHTML = `
+      <strong>AI</strong>
+      <div class="bubble">
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>`;
+    box.appendChild(typing);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  // Handle form submission — send message to Flask, display the AI reply
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMsg('user', text);
+    input.value = '';
+    showTyping();
+
+    try {
+      // POST the message to the Flask /chat/send route
+      const res  = await fetch('/chat/send', {
+        method: 'POST',
+        body: new URLSearchParams({ message: text })
+      });
+      const data = await res.json();
+      document.getElementById('typing')?.remove();
+      addMsg('bot', data.reply);
+    } catch {
+      document.getElementById('typing')?.remove();
+      addMsg('bot', '⚠️ Something went wrong. Please try again.');
+    }
+  });
 </script>
+
 {% endblock %}

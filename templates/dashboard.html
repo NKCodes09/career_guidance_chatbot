@@ -2,6 +2,8 @@
 {% block content %}
 
 <section class="dash-page">
+
+  <!-- Decorative background blobs and grid -->
   <div class="page-bg">
     <div class="blob blob-1"></div>
     <div class="blob blob-2"></div>
@@ -10,20 +12,22 @@
 
   <div class="dash-inner">
 
+    <!-- Header: greets the logged-in user -->
     <div class="dash-header">
-      <div>
-        <h1 class="dash-title">Welcome back 👋</h1>
-        <p class="dash-sub">{% if email %}{{ email }} — {% endif %}what would you like to work on today?</p>
-      </div>
+      <h1 class="dash-title">Welcome back 👋</h1>
+      <p class="dash-sub">
+        {% if email %}{{ email }} — {% endif %}what would you like to work on today?
+      </p>
     </div>
 
+    <!-- Feature cards: each links to a main tool -->
     <div class="dash-grid">
 
       <a href="/chat" class="dash-card">
         <div class="dash-card-icon" style="background:rgba(120,80,255,0.18);">💬</div>
         <div class="dash-card-body">
           <h3>Career Chat</h3>
-          <p>Talk to the AI about your goals, interests, and get a personalised career plan with 30/60/90 day steps.</p>
+          <p>Talk to the AI about your goals and get a personalised 30/60/90 day career plan.</p>
         </div>
         <div class="dash-card-arrow">→</div>
       </a>
@@ -32,7 +36,7 @@
         <div class="dash-card-icon" style="background:rgba(0,220,255,0.15);">📄</div>
         <div class="dash-card-body">
           <h3>CV Builder</h3>
-          <p>Build your CV section by section, improve descriptions with AI, then download it as a polished PDF.</p>
+          <p>Build your CV section by section, improve it with AI, then download as a PDF.</p>
         </div>
         <div class="dash-card-arrow">→</div>
       </a>
@@ -41,7 +45,7 @@
         <div class="dash-card-icon" style="background:rgba(255,180,0,0.15);">🎤</div>
         <div class="dash-card-body">
           <h3>Interview Prep</h3>
-          <p>Practice with AI-generated multiple choice questions tailored to any role or industry you choose.</p>
+          <p>Practice with AI-generated questions tailored to any role or industry.</p>
         </div>
         <div class="dash-card-arrow">→</div>
       </a>
@@ -50,29 +54,34 @@
         <div class="dash-card-icon" style="background:rgba(60,220,150,0.15);">✉️</div>
         <div class="dash-card-body">
           <h3>Cover Letter Generator</h3>
-          <p>Generate a compelling, personalised cover letter for any job in seconds — just paste the job description.</p>
+          <p>Generate a personalised cover letter instantly — just paste the job description.</p>
         </div>
         <div class="dash-card-arrow">→</div>
       </a>
 
     </div>
 
+    <!-- Helpful tip shown below the feature cards -->
     <div class="dash-tip">
       <span class="dash-tip-icon">💡</span>
-      <p><strong>Tip:</strong> Start with the Career Chat if you're unsure what direction to take — the AI will ask you the right questions.</p>
+      <p><strong>Tip:</strong> Start with Career Chat if you're unsure — the AI will ask the right questions.</p>
     </div>
 
-    <!-- Quiz history -->
+    <!-- Quiz history section: only shown if results data is passed from the backend -->
     {% if results is defined %}
     <div class="dash-history">
+
       <div class="dash-history-header">
         <h2>📊 Your Quiz History</h2>
         <a href="/interview" class="btn ghost small">Start New Quiz</a>
       </div>
+
       {% if results %}
         <div class="history-list">
           {% for r in results %}
+            <!-- Calculate percentage score for each quiz attempt -->
             {% set pct = ((r['score'] / r['total']) * 100)|round|int %}
+
             <div class="history-row">
               <div class="history-left">
                 <div class="history-topic">{{ r['topic'] }}</div>
@@ -80,6 +89,7 @@
               </div>
               <div class="history-right">
                 <span class="history-fraction">{{ r['score']|int }}/{{ r['total'] }}</span>
+                <!-- Colour-coded pill: green ≥70%, yellow ≥40%, red below 40% -->
                 <span class="score-pill {% if pct >= 70 %}pill-good{% elif pct >= 40 %}pill-ok{% else %}pill-bad{% endif %}">
                   {{ pct }}%
                 </span>
@@ -87,13 +97,16 @@
             </div>
           {% endfor %}
         </div>
+
       {% else %}
+        <!-- Empty state: user hasn't taken any quizzes yet -->
         <div class="history-empty">
           <span style="font-size:32px;">🎤</span>
           <p>No quiz attempts yet.</p>
           <a href="/interview" class="btn primary" style="margin-top:8px;">Take Your First Quiz</a>
         </div>
       {% endif %}
+
     </div>
     {% endif %}
 

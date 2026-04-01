@@ -2,22 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AI Career Coach</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI Career Coach</title>
+
+  <!-- Google Fonts — Inter typeface -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Main stylesheet -->
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+  <!-- Favicons -->
   <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png') }}">
-  <link rel="icon" type="image/png" sizes="32x32"  href="{{ url_for('static', filename='favicon-32x32.png') }}">
-  <link rel="icon" type="image/png" sizes="16x16"  href="{{ url_for('static', filename='favicon-16x16.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png') }}">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png') }}">
   <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest') }}">
 </head>
 <body>
 
+<!-- ── Navbar ─────────────────────────────────────────────────
+     Shows different links depending on whether the user is logged in.
+     session.get("user_id") is set by Flask when the user logs in.
+──────────────────────────────────────────────────────────── -->
 <header class="navbar">
   <div class="nav-inner">
     <a href="/" class="logo"><span class="logo-accent">AI</span> Career</a>
+
+    <!-- Desktop navigation -->
     <nav class="nav-links">
       {% if session.get("user_id") %}
         <a href="/dashboard"    class="nav-link">Dashboard</a>
@@ -31,10 +43,16 @@
         <a href="/signup" class="btn ghost small">Sign Up</a>
       {% endif %}
     </nav>
-    <button class="nav-burger" onclick="document.getElementById('nav-mobile').classList.toggle('open')" aria-label="Menu">
+
+    <!-- Hamburger button — toggles mobile menu on small screens -->
+    <button class="nav-burger"
+            onclick="document.getElementById('nav-mobile').classList.toggle('open')"
+            aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
   </div>
+
+  <!-- Mobile dropdown menu (hidden by default, shown when .open is added) -->
   <div class="nav-mobile" id="nav-mobile">
     {% if session.get("user_id") %}
       <a href="/dashboard">Dashboard</a>
@@ -50,16 +68,25 @@
   </div>
 </header>
 
+<!-- ── Flash Messages ──────────────────────────────────────────
+     Flask's flash() system passes one-time alerts (errors/success)
+     from the backend. get_flashed_messages() reads and clears them.
+──────────────────────────────────────────────────────────── -->
 {% with messages = get_flashed_messages(with_categories=true) %}
-{% if messages %}
-<div class="flash-wrapper">
-  {% for category, message in messages %}
-  <div class="flash {{ category }}">{{ message }}</div>
-  {% endfor %}
-</div>
-{% endif %}
+  {% if messages %}
+  <div class="flash-wrapper">
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  </div>
+  {% endif %}
 {% endwith %}
 
+<!-- ── Page Content ────────────────────────────────────────────
+     Each child template fills this block with its own content.
+     This is Jinja2 template inheritance — base.html is the shell.
+──────────────────────────────────────────────────────────── -->
 <main>{% block content %}{% endblock %}</main>
+
 </body>
 </html>

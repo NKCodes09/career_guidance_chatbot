@@ -2,80 +2,87 @@
 {% block content %}
 
 <section class="page">
-    <div class="page-bg">
-        <div class="blob blob-1"></div>
-        <div class="blob blob-2"></div>
-        <div class="grid-overlay"></div>
-    </div>
+  <!-- Decorative background -->
+  <div class="page-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+    <div class="grid-overlay"></div>
+  </div>
 
-    <div class="shell">
-        <div class="card">
-            <div class="card-pad">
-                <h2 class="card-title">Log In</h2>
-                <p class="card-subtitle">Welcome back. Continue your career journey.</p>
+  <div class="shell">
+    <div class="card">
+      <div class="card-pad">
+        <h2 class="card-title">Log In</h2>
+        <p class="card-subtitle">Welcome back. Continue your career journey.</p>
 
-                <form method="POST" class="form" id="login-form" novalidate>
+        <!-- novalidate disables browser's default validation so our JS handles it -->
+        <form method="POST" class="form" id="login-form" novalidate>
 
-                    <div class="field-wrap">
-                        <input class="input" type="email" name="email" id="email"
-                               placeholder="Email address" autocomplete="email">
-                        <span class="field-error" id="email-error"></span>
-                    </div>
+          <div class="field-wrap">
+            <input class="input" type="email" name="email" id="email"
+                   placeholder="Email address" autocomplete="email">
+            <span class="field-error" id="email-error"></span>
+          </div>
 
-                    <div class="field-wrap">
-                        <input class="input" type="password" name="password" id="password"
-                               placeholder="Password" autocomplete="current-password">
-                        <span class="field-error" id="password-error"></span>
-                    </div>
+          <div class="field-wrap">
+            <input class="input" type="password" name="password" id="password"
+                   placeholder="Password" autocomplete="current-password">
+            <span class="field-error" id="password-error"></span>
+          </div>
 
-                    <button class="btn primary block" type="submit">Log In</button>
-                </form>
+          <button class="btn primary block" type="submit">Log In</button>
+        </form>
 
-                <div class="helper-row">
-                    <a class="small-link" href="/signup">Don't have an account? Sign up</a>
-                    <a class="small-link" href="/">Back to home</a>
-                </div>
-            </div>
+        <div class="helper-row">
+          <a class="small-link" href="/signup">Don't have an account? Sign up</a>
+          <a class="small-link" href="/">Back to home</a>
         </div>
+      </div>
     </div>
+  </div>
 </section>
 
 <script>
-const form     = document.getElementById('login-form');
-const email    = document.getElementById('email');
-const password = document.getElementById('password');
+  const form     = document.getElementById('login-form');
+  const email    = document.getElementById('email');
+  const password = document.getElementById('password');
 
-function showError(id, msg) {
-    const el = document.getElementById(id);
-    el.textContent = msg;
-    el.style.display = msg ? 'block' : 'none';
-    const input = document.getElementById(id.replace('-error', ''));
+  // Shows or clears an error message under a field, and toggles the red border
+  function showError(fieldId, msg) {
+    const errorSpan = document.getElementById(fieldId + '-error');
+    const input     = document.getElementById(fieldId);
+    errorSpan.textContent  = msg;
+    errorSpan.style.display = msg ? 'block' : 'none';
     input.classList.toggle('input-error', !!msg);
-}
+  }
 
-function validateEmail() {
-    const v = email.value.trim();
-    if (!v)                          { showError('email-error', 'Email is required.'); return false; }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) { showError('email-error', 'Please enter a valid email address.'); return false; }
-    showError('email-error', ''); return true;
-}
+  function validateEmail() {
+    const val = email.value.trim();
+    if (!val) { showError('email', 'Email is required.'); return false; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) { showError('email', 'Please enter a valid email address.'); return false; }
+    showError('email', '');
+    return true;
+  }
 
-function validatePassword() {
-    if (!password.value) { showError('password-error', 'Password is required.'); return false; }
-    showError('password-error', ''); return true;
-}
+  function validatePassword() {
+    if (!password.value) { showError('password', 'Password is required.'); return false; }
+    showError('password', '');
+    return true;
+  }
 
-email.addEventListener('blur', validateEmail);
-password.addEventListener('blur', validatePassword);
+  // Validate each field when user leaves it (on blur)
+  email.addEventListener('blur', validateEmail);
+  password.addEventListener('blur', validatePassword);
 
-/* Clear error as soon as user starts correcting */
-email.addEventListener('input', () => { if (email.classList.contains('input-error')) validateEmail(); });
-password.addEventListener('input', () => { if (password.classList.contains('input-error')) validatePassword(); });
+  // Clear the error as soon as the user starts correcting the field
+  email.addEventListener('input',    () => { if (email.classList.contains('input-error'))    validateEmail(); });
+  password.addEventListener('input', () => { if (password.classList.contains('input-error')) validatePassword(); });
 
-form.addEventListener('submit', e => {
-    const ok = validateEmail() & validatePassword();   // bitwise — runs both
+  // On submit: use bitwise & (not &&) so BOTH fields are validated even if the first fails
+  form.addEventListener('submit', e => {
+    const ok = validateEmail() & validatePassword();
     if (!ok) e.preventDefault();
-});
+  });
 </script>
 
 {% endblock %}

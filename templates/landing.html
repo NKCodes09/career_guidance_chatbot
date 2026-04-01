@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 
-<!-- ── Hero ─────────────────────────────────────────────── -->
+<!-- ── Hero Section ───────────────────────────────────────── -->
 <section class="landing">
-  <!-- Background image + overlays -->
+
+  <!-- Layered background: image, dark overlay, grid -->
   <div class="hero-img-bg"></div>
   <div class="hero-img-overlay"></div>
   <div class="landing-bg">
     <div class="grid-overlay"></div>
   </div>
 
-  <!-- Content — centred single column over the image -->
+  <!-- Main hero content -->
   <div class="hero-center">
     <span class="pill">✦ AI Career Assistant • Any Career Path</span>
 
@@ -29,6 +30,7 @@
       <a href="/login"  class="btn ghost">I have an account</a>
     </div>
 
+    <!-- Key platform stats shown beneath the CTA buttons -->
     <div class="hero-stats">
       <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Industries</div></div>
       <div class="stat"><div class="stat-num">3–6</div><div class="stat-label">Career Paths</div></div>
@@ -38,13 +40,15 @@
   </div>
 </section>
 
-<!-- ── Features ──────────────────────────────────────────── -->
+<!-- ── Features Section ───────────────────────────────────── -->
 <section class="lp-section bg-alt">
   <div class="lp-inner">
     <div class="section-head">
       <h2 class="section-title">Powerful Features for Your Career Growth</h2>
       <p class="section-sub">Everything you need to land your dream role — in one place.</p>
     </div>
+
+    <!-- Four feature cards, one per tool -->
     <div class="features-grid">
       <div class="feature-card">
         <div class="feature-icon">🤖</div>
@@ -70,7 +74,7 @@
   </div>
 </section>
 
-<!-- ── Stats ─────────────────────────────────────────────── -->
+<!-- ── Stats Section ──────────────────────────────────────── -->
 <section class="lp-section">
   <div class="lp-inner">
     <div class="stats-row">
@@ -82,13 +86,15 @@
   </div>
 </section>
 
-<!-- ── How It Works ──────────────────────────────────────── -->
+<!-- ── How It Works ───────────────────────────────────────── -->
 <section class="lp-section bg-alt">
   <div class="lp-inner">
     <div class="section-head">
       <h2 class="section-title">How It Works</h2>
       <p class="section-sub">Four simple steps to accelerate your career growth.</p>
     </div>
+
+    <!-- Numbered step cards explaining the user journey -->
     <div class="steps-grid">
       <div class="step-card">
         <div class="step-num">1</div>
@@ -114,7 +120,7 @@
   </div>
 </section>
 
-<!-- ── Testimonials ──────────────────────────────────────── -->
+<!-- ── Testimonials ───────────────────────────────────────── -->
 <section class="lp-section">
   <div class="lp-inner">
     <div class="section-head">
@@ -146,12 +152,14 @@
   </div>
 </section>
 
-<!-- ── FAQ ───────────────────────────────────────────────── -->
+<!-- ── FAQ Section ────────────────────────────────────────── -->
 <section class="lp-section bg-alt">
   <div class="lp-inner">
     <div class="section-head">
       <h2 class="section-title">Frequently Asked Questions</h2>
     </div>
+
+    <!-- <details>/<summary> gives native expand/collapse with no JS needed -->
     <div class="faq-list">
       <details class="faq-item">
         <summary>What makes this AI Career Coach unique?</summary>
@@ -159,36 +167,36 @@
       </details>
       <details class="faq-item">
         <summary>Do I need to pay anything?</summary>
-        <p>No — the platform is completely free to use. Simply create an account and start exploring all the features immediately.</p>
+        <p>No — the platform is completely free. Simply create an account and start exploring all features immediately.</p>
       </details>
       <details class="faq-item">
         <summary>How does the CV Analyser work?</summary>
-        <p>You paste your CV text into the analyser and our AI reviews it — identifying your key strengths, skill gaps, best-fit career matches, and giving you specific next steps to improve your employability.</p>
+        <p>Paste your CV text and the AI reviews it — identifying strengths, skill gaps, best-fit career matches, and specific next steps to improve your employability.</p>
       </details>
       <details class="faq-item">
         <summary>What is the mock interview quiz?</summary>
-        <p>The interview prep tool generates 10 multiple-choice questions tailored to the job role or industry you specify. After each question you can see the correct answer and an explanation to help you learn.</p>
+        <p>It generates 10 multiple-choice questions tailored to your chosen role or industry. After each question you can view the correct answer and an explanation.</p>
       </details>
       <details class="faq-item">
         <summary>Can it help with non-tech careers?</summary>
-        <p>Absolutely. The AI is specifically designed to support all career paths — healthcare, business, creative industries, trades, education, finance, and more.</p>
+        <p>Absolutely. The AI supports all career paths — healthcare, business, creative industries, trades, education, finance, and more.</p>
       </details>
     </div>
   </div>
 </section>
 
-<!-- ── CTA ───────────────────────────────────────────────── -->
+<!-- ── Call to Action ─────────────────────────────────────── -->
 <section class="lp-cta">
   <div class="lp-inner">
     <div class="cta-box">
       <h2>Ready to Accelerate Your Career?</h2>
-      <p>Join thousands of professionals who are advancing their careers with AI-powered guidance.</p>
+      <p>Join thousands of professionals advancing their careers with AI-powered guidance.</p>
       <a href="/signup" class="btn primary">Start Your Journey Today →</a>
     </div>
   </div>
 </section>
 
-<!-- ── Footer ────────────────────────────────────────────── -->
+<!-- ── Footer ─────────────────────────────────────────────── -->
 <footer class="footer">
   <div class="lp-inner">
     <div class="footer-inner">
@@ -199,4 +207,3 @@
 </footer>
 
 {% endblock %}
-
