@@ -2,7 +2,6 @@ import os
 import json
 import sqlite3
 from functools import wraps
-
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from dotenv import load_dotenv
@@ -22,7 +21,7 @@ client     = genai.Client(api_key=API_KEY)
 MODEL_NAME = "models/gemini-2.5-flash"
 
 app = Flask(__name__)
-app.secret_key = "replace_this_with_random_secret"  # Used to sign/encrypt session cookies
+app.secret_key = os.getenv("SECRET_KEY")  # Used to sign/encrypt session cookies
 
 DB_NAME = "database.db"
 
